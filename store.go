@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// --- Naive store is included for the sake of comparison ---
+
 // NaiveStore stores information on the network naively by simply placing it on
 // the local node. It generate a UUIS for the information and creates an
 // information block and return information uuid
@@ -14,7 +16,10 @@ func NaiveStore(overlay OverlayPCG, data string) string {
 	return uuid
 }
 
-func status(overlay OverlayPCG, groupId []byte) []byte {
+// ----------------------------------------------------------
+
+func status(overlayInterface node.Overlay, groupId []byte) []byte {
+	overlay := overlayInterface.(*OverlayPCG)
 	_, err := overlay.Group(string(groupId))
 	if err != nil {
 		return []byte("Group not found")
@@ -22,7 +27,8 @@ func status(overlay OverlayPCG, groupId []byte) []byte {
 	return []byte("Group member")
 }
 
-func storageStatus(overlay OverlayPCG, _ []byte) []byte {
+func storageStatus(overlayInterface node.Overlay, _ []byte) []byte {
+	overlay := overlayInterface.(*OverlayPCG)
 	// if len(node.Groups()) vs cap(node.Groups()) if len == cap the unable to
 	// store more groups if len < cap the able to store more groups
 	if len(overlay.Groups()) < cap(overlay.Groups()) {
@@ -49,10 +55,10 @@ func AppendGroupStoreBehaviour(node *node.Node) {
 // a group that will store this information, and then the participants are
 // responsible for filling out the group (to it's max capacity of 3) - groups
 // want to be in a state where they have 3 participants
-func NaiveGroupStore(node *node.Node, keywords []string, data string) string {
-	uuid := node.AddGroup(keywords, data)
-	newGroup, _ := node.Group(uuid)
-	newGroup.AddParticipant(node.SocketAddr())
+func NaiveGroupStore(pcg OverlayPCG, data string) string {
+	uuid := pcg.AddGroup(data)
+	newGroup, _ := pcg.Group(uuid)
+	newGroup.AddParticipant(pcg.Node().SocketAddr())
 	return uuid
 }
 
@@ -60,15 +66,16 @@ func NaiveGroupStore(node *node.Node, keywords []string, data string) string {
 // long as it is done faily effectively this should be good enough (no need for
 // concensus - should naurally come to concenus as each node manages it's own
 // participant list
-func heartbeat(node *node.Node) {
+func heartbeat(overlayInterface node.Overlay) {
+	overlay := overlayInterface.(*OverlayPCG)
 	for {
-		manageParticipants(node)
+		manageParticipants(overlay)
 		time.Sleep(time.Second * 30)
 	}
 }
 
-func manageParticipants(node *node.Node) {
-	for id, group := range node.Groups() { // for all my groups
+func manageParticipants(pcg *OverlayPCG) {
+	for id, group := range pcg.Groups() { // for all my groups
 		// check status of each participant in group
 		for _, participant := range group.Participants() {
 			// if participant is not alive
@@ -80,14 +87,14 @@ func manageParticipants(node *node.Node) {
 			// if in group our list of participants is correct
 		}
 		if len(group.Participants()) < 3 {
-			go findParticipants(node, &group) // group is in a fragile unhappy state - find more participants
+			go findParticipants(pcg, &group) // group is in a fragile unhappy state - find more participants
 		}
 	}
 }
 
-func findParticipants(node *node.Node, group *node.Group) {
+func findParticipants(pcg *OverlayPCG, group *Group) {
 	for { // runs until a partipant is found - then breaks out of loop
-		for _, host := range node.KnownHosts() {
+		for _, host := range pcg.Node().KnownHosts() {
 			// ask if they would like to join the group i.e. if they have capacity
 			repsones, err := utils.Request(host, []byte("storage-status/"), nil)
 			if err != nil || string(repsones) != "no storage available" {

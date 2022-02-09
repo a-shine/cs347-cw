@@ -7,6 +7,8 @@ import (
 	uuid "github.com/nu7hatch/gouuid"
 )
 
+// TODO: add the notion of maximum memory for storage
+
 type OverlayPCG struct {
 	node    *node.Node
 	storage map[uuid.UUID]Group
