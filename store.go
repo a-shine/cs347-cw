@@ -31,7 +31,7 @@ func storageStatus(overlayInterface node.Overlay, _ []byte) []byte {
 	overlay := overlayInterface.(*OverlayPCG)
 	// if len(node.Groups()) vs cap(node.Groups()) if len == cap the unable to
 	// store more groups if len < cap the able to store more groups
-	if len(overlay.Groups()) < cap(overlay.Groups()) {
+	if len(overlay.Groups()) < int(overlay.memory) {
 		return []byte("storage available")
 	}
 	// if len > cap this should never happen - we should not use more memory

@@ -24,5 +24,5 @@ import (
 
 func simple_test(t *testing.T) {
 	butterNode, _ := node.NewNode(0, 512, false)
-	SpawnPCG(&butterNode)
+	SpawnPCG(&butterNode, 512)
 }

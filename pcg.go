@@ -10,6 +10,7 @@ import (
 // TODO: add the notion of maximum memory for storage
 
 type OverlayPCG struct {
+	memory  uint64
 	node    *node.Node
 	storage map[uuid.UUID]Group
 }

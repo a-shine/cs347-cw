@@ -1,7 +1,7 @@
-package pcg
-
-// The retrieve functionality is mostly a simple port from the butter framework because storage is handled in a similar
+// The retrieve functionality is mostly a stripped down version from the butter framework because storage is handled in a similar
 // hash map way to the default butter overlay implementation
+
+package pcg
 
 import (
 	"fmt"
