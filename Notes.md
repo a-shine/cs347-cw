@@ -110,7 +110,7 @@ This also is entirely unstructured which is nice.
 
 ## Key points
 
-What we are building is an *Overlay Network*. This means we will be interfacing with the actual nodes which make up the network, and using other preexisting overlaynetworks to help us do things. ==Alex please help here== 
+What we are building is an *Overlay Network*, much lke Chord or Kadmilia on structured peer-to-peer architectures, but in this case we present a persistent storage overlay on an unstructured architecure - this allow for more decentralisation. In an overlay network we interface with the underlying nodes and add the extra functionalities that allow for persistent storage on the network.
 
 A Peer Content Group (PCG) implementation without any hierarchies.
 
@@ -134,7 +134,9 @@ If a leader wishes to add a member to the group it will consult it's known hosts
 
 Notion of node suitability comes from a calculation performed internally to each node, which can then be queried by any other node. The calculation is likely to include factors such as; storage availability; up-time; and network quality. (Note: this is highly unsafe given byzantine failure or malicious operation)
 
+## Store
 
+The node wishing to store a piece of data will create a new group and instantaneously fall into the state as it's only member and therefore leader attempting to resolve the unsafe state the group is in.
 
 ## Retrieve
 
