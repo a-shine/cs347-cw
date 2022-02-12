@@ -1,6 +1,6 @@
-# Maintaining Information Availability in a High Churn Unstructured Peer-to-Peer Systems
+# Maintaining Information Availability in a High Churn Unstructured Peer-to-Peer System
 
-
+^^ Title subject to change
 
 ## Keywords
 
@@ -9,6 +9,15 @@ We need consistency with our terminology.
 * Node
   * Node and Peer have been used interchangeably up until this point. 
   * For our paper we shall only use the term Node due to it's greater usage in general academic papers relating to distributed and p2p systems.
+* Health??
+* Client??
+* Churn
+  * bla bla bla
+
+* Leader?
+* Suitability
+  * Basically the availability of a node to take more data and how good it is at node stuff
+
 
 
 
@@ -61,16 +70,41 @@ https://www.scirp.org/pdf/IJIDS_2014042910144755.pdf
     * This is NOT unstructured. It creates potential for single points of failure. 
       * The paper implies duplication of super-peers will protect, but ideologically insufficient as if super-peers go down the entire network breaks
   * Group interface is identical to a singular client interface, if there are changes to the group then the client querying the group will have no knowledge. The underlying network below groups should be TRANSPARENT to the user.
-
 * Hierarchical Approach
   * May be a requirement from JXTA but not entirely sure.
-  * 
+  * gives you abstract groups that don't seem to serve so much purpose
+  * seems just kinda stupid
 
 ### What we can take from it
+
+Good idea about PCG and how they maintain their group health with heartbeats and leader elections.
+
+Very bad structured implementation with super-peers and stuff like that.
+
+Heirarchies are also stupid.
+
+TLDR; good PCG everything else fucking stupid. :)
 
 ## Dynamic Model-Driven Replication System
 
 https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1540492
+
+### Key points
+
+* No groups (must use Replica locator which is slow)
+* At some given interval, look at network and see if the data should be replicated anymore (using replica locator)
+* Neccesity to replicate defined dynamically based on network status
+* Find best hosts for candidates if required and give them the data
+
+### What we can take from it
+
+Dynamic methodologies for replication
+
+Our initial approach will just $r=3$ for simplicity. If $r$ could be modified dynamically based on live features of the network this may be desiriable. 
+
+It uses factors such as node location also for finding best candidate nodes.
+
+This also is entirely unstructured which is nice.
 
 # Our Proposed Solution
 
@@ -88,13 +122,13 @@ As groups should be in agreement of who is in the group (may require local group
 
 ​	 Leader = group member of highest ID.
 
+
+
 ## Group Maintenance
 
 As stated earlier, the responsibility lies with the group to ensure group health. More specifically, it is the group leader's responsibility to 'fix' the situation if the group is in an "unsafe" state.
 
 The primary "unsafe" state is when there are too few members in the group. In this case, the leader will work to find new group members and recruit them. This ideology is used to help reduce message complexity, meaning nodes are only used when they are needed. 
-
-
 
 If a leader wishes to add a member to the group it will consult it's known hosts list (contained in node) and ask for their availability. If they are the most suitable they will be requested to join a group.
 
@@ -118,7 +152,67 @@ In the case of  leader node failure, the next leader can then pickup the request
 
 
 
+## Stuff we are NOT doing
 
+We are not implementing a system to automatically remove nodes from a group and replace them with a new one.
+
+Not using locatino to help sort it.
+
+Not doing NAT traversal systems (I think? just not worth it potentially)
+
+# Server Behaviours Required (Endpoints)
+
+==People please help me fill these out==
+
+## Heartbeat
+
+ /heartbeat
+
+##### Description:
+
+###### Data-in:
+
+###### Data-out:
+
+---
+
+## Get Suitability
+
+ /suitability
+
+##### Description:
+
+###### Data-in:
+
+###### Data-out:
+
+---
+
+## Request to Join Group
+
+ /joinrequest
+
+##### Description:
+
+###### Data-in:
+
+###### Data-out:
+
+---
+
+## Request data generally??
+
+---
+
+## Group Request 
+
+inform members of the new request 
+
+---
+
+## Request Complete
+
+inform members a request has been completed and they can now forget it. 
 
 # Questions to keep Nick Brain Happy
 
