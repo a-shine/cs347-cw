@@ -7,7 +7,7 @@ import (
 )
 
 func retrieve(overlay node.Overlay, query []byte) []byte {
-	persistOverlay := overlay.(*Overlay)
+	persistOverlay := overlay.(*PCG)
 	block, err := persistOverlay.Block(string(query))
 	if err == nil {
 		return append([]byte("found/"), block.Data()...)
@@ -35,7 +35,7 @@ func AppendRetrieveBehaviour(node *node.Node) {
 // NaiveRetrieve High level entrypoint for searching for a specific piece of information on the network
 // look if I have the information else look at the most likely known host to get to that information
 // one query per piece of information (one-to-one) hence the query has to be unique i.e i.d.
-func NaiveRetrieve(overlay *Overlay, query string) []byte {
+func NaiveRetrieve(overlay *PCG, query string) []byte {
 	// do I have this information, if so return it
 	// else BFS (pass the query on to all known hosts (partial view)
 	block, err := overlay.Block(query)
@@ -45,7 +45,7 @@ func NaiveRetrieve(overlay *Overlay, query string) []byte {
 	return bfs(overlay, query)
 }
 
-func bfs(overlay *Overlay, query string) []byte {
+func bfs(overlay *PCG, query string) []byte {
 	// Initialise an empty queue
 	queue := make([]utils.SocketAddr, 0)
 	// Add all my known hosts to the queue

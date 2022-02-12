@@ -8,15 +8,15 @@ import (
 	"os"
 )
 
-func add(overlay *pcg.Overlay) {
+func add(overlay *pcg.PCG) {
 	fmt.Println("Input information:")
 	in := bufio.NewReader(os.Stdin)
 	data, _ := in.ReadString('\n') // Read string up to newline
-	uuid := pcg.NaiveStore(overlay, []string{"1", "2", "3", "4", "5"}, data)
+	uuid := pcg.NaiveStore(overlay, data)
 	fmt.Println("UUID:", uuid)
 }
 
-func retrieve(overlay *pcg.Overlay) {
+func retrieve(overlay *pcg.PCG) {
 	fmt.Println("Information UUID:")
 	in := bufio.NewReader(os.Stdin)
 	uuid, _ := in.ReadString('\n') // Read string up to newline
@@ -25,7 +25,7 @@ func retrieve(overlay *pcg.Overlay) {
 }
 
 func interact(overlayInterface node.Overlay) {
-	pcg := overlayInterface.(*pcg.Overlay)
+	pcg := overlayInterface.(*pcg.PCG)
 	for {
 		// prompt to pcgStore or pcgRetrieve information
 		var interactionType string
