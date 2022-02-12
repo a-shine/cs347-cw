@@ -1,6 +1,3 @@
-// The retrieve functionality is mostly a stripped down version from the butter framework because storage is handled in a similar
-// hash map way to the default butter overlay implementation
-
 package pcg
 
 import (
@@ -10,13 +7,13 @@ import (
 )
 
 func retrieve(overlay node.Overlay, query []byte) []byte {
-	pcg := overlay.(*OverlayPCG)
-	block, err := pcg.Group(string(query))
+	persistOverlay := overlay.(*Overlay)
+	block, err := persistOverlay.Block(string(query))
 	if err == nil {
 		return append([]byte("found/"), block.Data()...)
 	}
 
-	hostsStruct := overlay.Node().KnownHostsStruct()
+	hostsStruct := persistOverlay.Node().KnownHostsStruct()
 	knownHostsJson, _ := hostsStruct.ToJson()
 	return append([]byte("try/"), knownHostsJson...)
 }
@@ -30,25 +27,25 @@ func try(node *node.Node, query []byte) []byte {
 }
 
 func AppendRetrieveBehaviour(node *node.Node) {
-	node.RegisterServerBehaviour("retrieve/", retrieve)
-	//node.RegisterRoute("found/", found)
-	//node.RegisterRoute("try/", try)
+	node.RegisterServerBehaviour("pcgRetrieve/", retrieve)
+	//node.RegisterServerBehaviour("found/", found)
+	//node.RegisterServerBehaviour("try/", try)
 }
 
 // NaiveRetrieve High level entrypoint for searching for a specific piece of information on the network
 // look if I have the information else look at the most likely known host to get to that information
 // one query per piece of information (one-to-one) hence the query has to be unique i.e i.d.
-func NaiveRetrieve(overlay OverlayPCG, query string) []byte {
+func NaiveRetrieve(overlay *Overlay, query string) []byte {
 	// do I have this information, if so return it
 	// else BFS (pass the query on to all known hosts (partial view)
-	block, err := overlay.Group(string(query))
+	block, err := overlay.Block(query)
 	if err == nil {
 		return block.Data()
 	}
 	return bfs(overlay, query)
 }
 
-func bfs(overlay OverlayPCG, query string) []byte {
+func bfs(overlay *Overlay, query string) []byte {
 	// Initialise an empty queue
 	queue := make([]utils.SocketAddr, 0)
 	// Add all my known hosts to the queue
@@ -60,7 +57,7 @@ func bfs(overlay OverlayPCG, query string) []byte {
 		host := queue[0]
 		queue = queue[1:]
 		// Start a connection to the host, Ask host if he has data, receive resposnse
-		response, _ := utils.Request(host, []byte("retrieve/"), []byte(query))
+		response, _ := utils.Request(host, []byte("pcgRetrieve/"), []byte(query))
 		route, payload, err := utils.ParsePacket(response)
 		if err != nil {
 			fmt.Println("unable to parse packet")
