@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/a-shine/butter"
 	"github.com/a-shine/butter/node"
 	"github.com/a-shine/cs347-cw/pcg"
 	"os"
@@ -46,6 +47,9 @@ func interact(overlayInterface node.Overlay) {
 func main() {
 	butterNode, _ := node.NewNode(0, 512, false)
 	butterNode.RegisterClientBehaviour(interact)
-	//pcg.SpawnPCG(&butterNode, 512)
-	pcg.SpawnOverlay(&butterNode, false)
+
+	overlay := pcg.NewPCG(&butterNode) // Creates a new overlay network
+	pcg.AppendRetrieveBehaviour(overlay.Node())
+
+	butter.Spawn(&overlay, false)
 }

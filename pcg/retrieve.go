@@ -8,7 +8,7 @@ import (
 
 func retrieve(overlay node.Overlay, query []byte) []byte {
 	persistOverlay := overlay.(*PCG)
-	block, err := persistOverlay.Block(string(query))
+	block, err := persistOverlay.Group(string(query))
 	if err == nil {
 		return append([]byte("found/"), block.Data()...)
 	}
@@ -38,7 +38,7 @@ func AppendRetrieveBehaviour(node *node.Node) {
 func NaiveRetrieve(overlay *PCG, query string) []byte {
 	// do I have this information, if so return it
 	// else BFS (pass the query on to all known hosts (partial view)
-	block, err := overlay.Block(query)
+	block, err := overlay.Group(query)
 	if err == nil {
 		return block.Data()
 	}
