@@ -10,7 +10,9 @@ We need consistency with our terminology.
   * Node and Peer have been used interchangeably up until this point. 
   * For our paper we shall only use the term Node due to it's greater usage in general academic papers relating to distributed and p2p systems.
 * Health??
-* Client??
+  * evaluates a group status, i.e. Too few or too many nodes in a group
+* Client
+  * in traditional web server sense
 * Churn
   * bla bla bla
 
