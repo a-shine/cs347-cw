@@ -85,7 +85,7 @@ func findParticipants(pcg *PCG, group *Group) {
 			// ask if they would like to join the group i.e. if they have capacity
 			repsones, err := utils.Request(host, []byte(canJoinUri), nil)
 			if err != nil || string(repsones) != "no storage available" {
-				// to bad
+				// too bad
 			}
 			if string(repsones) == "storage available" {
 				group.AddParticipant(host)
