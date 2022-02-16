@@ -13,7 +13,7 @@ func add(overlay *pcg.PCG) {
 	fmt.Println("Input information:")
 	in := bufio.NewReader(os.Stdin)
 	data, _ := in.ReadString('\n') // Read string up to newline
-	uuid := pcg.NaiveStore(overlay, data)
+	uuid := pcg.PCGStore(overlay, data)
 	fmt.Println("UUID:", uuid)
 }
 
@@ -48,8 +48,9 @@ func main() {
 	butterNode, _ := node.NewNode(0, 512, false)
 	butterNode.RegisterClientBehaviour(interact)
 
-	overlay := pcg.NewPCG(&butterNode) // Creates a new overlay network
+	overlay := pcg.NewPCG(&butterNode, 512) // Creates a new overlay network
 	pcg.AppendRetrieveBehaviour(overlay.Node())
+	pcg.AppendGroupStoreBehaviour(overlay.Node())
 
 	butter.Spawn(&overlay, false)
 }

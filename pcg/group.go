@@ -3,8 +3,10 @@ package pcg
 import (
 	"errors"
 	"github.com/a-shine/butter/utils"
+	"unsafe"
 )
 
+const GroupSize = unsafe.Sizeof(Group{})
 const ReplicationCount = 3
 const ParticipantCount = ReplicationCount
 

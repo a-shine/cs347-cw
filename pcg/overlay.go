@@ -9,8 +9,9 @@ import (
 )
 
 type PCG struct {
-	node    *node.Node
-	storage map[[32]byte]Group
+	node       *node.Node
+	maxStorage uint64
+	storage    map[[32]byte]Group
 }
 
 func (o *PCG) Node() *node.Node {
@@ -39,9 +40,25 @@ func (o *PCG) Group(id string) (Group, error) {
 	return Group{}, errors.New("block not found")
 }
 
-func NewPCG(node *node.Node) PCG {
+func (o *PCG) Groups() map[[32]byte]Group {
+	return o.storage
+}
+
+func MbToBytes(mb uint64) uint64 {
+	return uint64(mb * 1024 * 1024)
+}
+
+func MaxStorage(maxMemory uint64) uint64 {
+	return maxMemory / uint64(GroupSize)
+}
+
+func NewPCG(node *node.Node, maxMemoryMb uint64) PCG {
+	maxMemory := MbToBytes(maxMemoryMb)
+	maxStorage := MaxStorage(maxMemory)
+	fmt.Println("Max storage:", maxStorage)
 	return PCG{
-		node:    node,
-		storage: make(map[[32]byte]Group),
+		node:       node,
+		maxStorage: maxStorage,
+		storage:    make(map[[32]byte]Group),
 	}
 }
