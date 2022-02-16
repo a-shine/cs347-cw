@@ -14,9 +14,9 @@ We need consistency with our terminology.
 * Client
   * in traditional web server sense
 * Churn
-  * bla bla bla
-
+  * Refers to high number of joining and leaving participants in the network.
 * Leader?
+  * A node is elected at a group Leader to perform group actions such as handling requestes to clients
 * Suitability
   * Basically the availability of a node to take more data and how good it is at node stuff
 
