@@ -1,10 +1,12 @@
 package pcg
 
 import (
+	"encoding/json"
+	"fmt"
+	"time"
+
 	"github.com/a-shine/butter/node"
 	"github.com/a-shine/butter/utils"
-	"time"
-	"fmt"
 )
 
 const (
@@ -14,9 +16,11 @@ const (
 )
 
 func PCGStore(overlay *Peer, data string) string {
-	uuid := overlay.AddGroup(data)
+	uuid := overlay.NewGroup(data)
 	return uuid
 }
+
+var alreadyFinding bool
 
 // AppendGroupStoreBehaviour registers the behaviours that allow the node to work with the pcg overlay
 func AppendGroupStoreBehaviour(node *node.Node) {
@@ -39,6 +43,7 @@ func inGroup(overlayInterface node.Overlay, groupId []byte) []byte {
 
 func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
 	peer := overlayInterface.(*Peer)
+	fmt.Println(string(payload))
 	// if len(node.Groups()) vs cap(node.Groups()) if len == cap the unable to
 	// store more groups if len < cap the able to store more groups
 	fmt.Println("I'm can join")
@@ -46,10 +51,15 @@ func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
 		//Start go routine that will add me to the group that has been requested
 
 		//Parse payload to get the group which I'm supposed to join :)
-		
-
-		go 
-		return []byte("accept")
+		var groupDigest Group //TODO update to group Digest struct once group has been filled out further
+		err := json.Unmarshal(payload, &groupDigest)
+		if err != nil {
+			fmt.Println("erroe marchallng grou")
+		}
+		fmt.Println(groupDigest.String())
+		peer.JoinGroup(groupDigest)
+		fmt.Println("Joined someones group")
+		return []byte("accepted")
 	}
 	// if len > cap this should never happen - we should not use more memory
 	// than we have allocated to the node at runtime
@@ -65,15 +75,31 @@ func heartbeat(overlayInterface node.Overlay) {
 	pcg := overlayInterface.(*Peer)
 	for {
 		manageParticipants(pcg)
-		// fmt.Println("My heart beats for you")
+		fmt.Println("Num groups", len(pcg.Groups()))
 		time.Sleep(time.Second * 5)
 	}
+}
+
+func (p *Peer) amILeader(g *Group) bool {
+	socketAddr := p.Node().SocketAddr()
+	socketAddrStr := socketAddr.ToString()
+
+	if !GroupContains(g.Participants, socketAddr) {
+		return false
+	}
+
+	for _, h := range g.Participants {
+		if h.ToString() > socketAddrStr {
+			return false
+		}
+	}
+	return true
 }
 
 func manageParticipants(pcg *Peer) {
 	for id, group := range pcg.Groups() { // for all my groups
 		// check status of each participant in group
-		for _, participant := range group.Participants() {
+		for _, participant := range group.Participants {
 			// if participant is not alive
 			repsonce, err := utils.Request(participant, []byte(inGroupUri), id[:])
 			// remove participant
@@ -82,31 +108,48 @@ func manageParticipants(pcg *Peer) {
 			}
 			// if in group our list of participants is correct
 		}
-		print(len(group.Participants()))
-		if len(group.Participants()) < 3 { //FIx this as if findParticipants already running then it'll make multiple
+		if pcg.amILeader(&group) && ((len(group.Participants)) < 3) && !alreadyFinding { //FIx this as if findParticipants already running then it'll make multiple
 			go findParticipants(pcg, &group) // group is in a fragile unhappy state - find more participants
 		}
 	}
 }
 
+func GroupContains(g []utils.SocketAddr, h utils.SocketAddr) bool {
+	for _, a := range g {
+		if a.ToString() == h.ToString() {
+			return true
+		}
+	}
+	return false
+}
+
 func findParticipants(pcg *Peer, group *Group) {
+	alreadyFinding = true
 	// fmt.Print("finding!")
 	for { // runs until a partipant is found - then breaks out of loop
 		for _, host := range pcg.Node().KnownHosts() {
+			if GroupContains(group.Participants, host) {
+				continue
+			}
 			// ask if they would like to join the group i.e. if they have capacity
-			response, err := utils.Request(host, []byte(canJoinUri), nil)
+			output, err := json.Marshal(group)
+			fmt.Println(string(output))
+			if err != nil {
+				break
+			}
+			response, err := utils.Request(host, []byte(canJoinUri), output)
 			// fmt.Println(string(response))
 			if err != nil || string(response) == "no storage available" {
 				// too bad
 				fmt.Print("life is sad")
-			} 
-			
+			}
+
 			if string(response) == "accepted" {
 				group.AddParticipant(host)
 
 				//Send message to host that we want him to be added to our group
-				
-				if len(group.Participants()) == 3 {
+
+				if len(group.Participants) == 3 {
 					break
 					return // this instead maybe? no need for second check later
 				}
@@ -121,10 +164,10 @@ func findParticipants(pcg *Peer, group *Group) {
 
 		// do this until a participant is found - so if doen't work first time try
 		// again - if group particpants becomes 3 then break
-		if len(group.Participants()) == 3 {
+		if len(group.Participants) == 3 {
 			break
 		}
 		time.Sleep(time.Second * 5)
 	}
-
+	alreadyFinding = false
 }
