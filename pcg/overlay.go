@@ -8,29 +8,31 @@ import (
 	"github.com/a-shine/butter/node"
 )
 
-type PCG struct {
+type Peer struct {
 	node       *node.Node
 	maxStorage uint64
+	currentStorage uint64
 	storage    map[[32]byte]Group
 }
 
-func (o *PCG) Node() *node.Node {
+func (o *Peer) Node() *node.Node {
 	return o.node
 }
 
 // AddGroup to the node's storage. A UUID is generated for every bit of information added to the network (no update
 // functionality yet!). Returns the UUID of the new block as a string.
-func (o *PCG) AddGroup(data string) string {
+func (p *Peer) AddGroup(data string) string {
 	// check if node memory (allocated by the user on initialization) is full - node API
 	hsha2 := sha256.Sum256([]byte(data))
 	var formattedData [4096]byte
 	copy(formattedData[:], data)
-	o.storage[hsha2] = NewGroup(formattedData, o.node.SocketAddr())
+	p.storage[hsha2] = NewGroup(formattedData, p.node.SocketAddr())
+	p.currentStorage+=4096 //TODO
 	return fmt.Sprintf("%x", hsha2)
 }
 
 // Group from the node's storage by its UUID. If the block is not found, an empty block with an error is returned.
-func (o *PCG) Group(id string) (Group, error) {
+func (o *Peer) Group(id string) (Group, error) {
 	var hash [32]byte
 	data, _ := hex.DecodeString(id)
 	copy(hash[:], data)
@@ -40,7 +42,7 @@ func (o *PCG) Group(id string) (Group, error) {
 	return Group{}, errors.New("block not found")
 }
 
-func (o *PCG) Groups() map[[32]byte]Group {
+func (o *Peer) Groups() map[[32]byte]Group {
 	return o.storage
 }
 
@@ -52,13 +54,21 @@ func MaxStorage(maxMemory uint64) uint64 {
 	return maxMemory / uint64(GroupSize)
 }
 
-func NewPCG(node *node.Node, maxMemoryMb uint64) PCG {
+func NewPCG(node *node.Node, maxMemoryMb uint64) Peer {
 	maxMemory := MbToBytes(maxMemoryMb)
 	maxStorage := MaxStorage(maxMemory)
 	fmt.Println("Max storage:", maxStorage)
-	return PCG{
+	return Peer{
 		node:       node,
 		maxStorage: maxStorage,
 		storage:    make(map[[32]byte]Group),
 	}
+}
+
+func (p *Peer) String() string {
+	str := ""
+	for _, g := range p.Groups() {
+		str = str + g.String()
+	}	
+	return fmt.Sprintf("%s", str)
 }

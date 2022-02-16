@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func add(overlay *pcg.PCG) {
+func add(overlay *pcg.Peer) {
 	fmt.Println("Input information:")
 	in := bufio.NewReader(os.Stdin)
 	data, _ := in.ReadString('\n') // Read string up to newline
@@ -17,7 +17,7 @@ func add(overlay *pcg.PCG) {
 	fmt.Println("UUID:", uuid)
 }
 
-func retrieve(overlay *pcg.PCG) {
+func retrieve(overlay *pcg.Peer) {
 	fmt.Println("Information UUID:")
 	in := bufio.NewReader(os.Stdin)
 	uuid, _ := in.ReadString('\n') // Read string up to newline
@@ -25,19 +25,25 @@ func retrieve(overlay *pcg.PCG) {
 	fmt.Println(string(data))
 }
 
+func printAll(peer *pcg.Peer) {
+	fmt.Println(peer.String())
+}
+
 func interact(overlayInterface node.Overlay) {
-	pcg := overlayInterface.(*pcg.PCG)
+	peer := overlayInterface.(*pcg.Peer)
 	for {
 		// prompt to pcgStore or pcgRetrieve information
 		var interactionType string
-		fmt.Print("add(1) or pcgRetrieve(2) information?")
+		fmt.Print("add(1) or pcgRetrieve(2) or All My IDs(3) information?")
 		fmt.Scanln(&interactionType)
 
 		switch interactionType {
 		case "1":
-			add(pcg)
+			add(peer)
 		case "2":
-			retrieve(pcg)
+			retrieve(peer)
+		case "3":
+			printAll(peer)
 		default:
 			fmt.Println("Invalid choice")
 		}

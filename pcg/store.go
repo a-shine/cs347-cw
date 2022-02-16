@@ -4,6 +4,7 @@ import (
 	"github.com/a-shine/butter/node"
 	"github.com/a-shine/butter/utils"
 	"time"
+	"fmt"
 )
 
 const (
@@ -12,7 +13,7 @@ const (
 	canJoinUri = "can-join?/"
 )
 
-func PCGStore(overlay *PCG, data string) string {
+func PCGStore(overlay *Peer, data string) string {
 	uuid := overlay.AddGroup(data)
 	return uuid
 }
@@ -28,7 +29,7 @@ func AppendGroupStoreBehaviour(node *node.Node) {
 // --- Server behaviours (can be thought of as questions) ---
 
 func inGroup(overlayInterface node.Overlay, groupId []byte) []byte {
-	pcg := overlayInterface.(*PCG)
+	pcg := overlayInterface.(*Peer)
 	_, err := pcg.Group(string(groupId))
 	if err != nil {
 		return []byte("Group not found")
@@ -36,12 +37,19 @@ func inGroup(overlayInterface node.Overlay, groupId []byte) []byte {
 	return []byte("Group member")
 }
 
-func canJoin(overlayInterface node.Overlay, _ []byte) []byte {
-	pcg := overlayInterface.(*PCG)
+func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
+	peer := overlayInterface.(*Peer)
 	// if len(node.Groups()) vs cap(node.Groups()) if len == cap the unable to
 	// store more groups if len < cap the able to store more groups
-	if len(pcg.Groups()) < int(pcg.maxStorage) {
-		return []byte("storage available")
+	fmt.Println("I'm can join")
+	if peer.currentStorage < peer.maxStorage {
+		//Start go routine that will add me to the group that has been requested
+
+		//Parse payload to get the group which I'm supposed to join :)
+		
+
+		go 
+		return []byte("accept")
 	}
 	// if len > cap this should never happen - we should not use more memory
 	// than we have allocated to the node at runtime
@@ -54,14 +62,15 @@ func canJoin(overlayInterface node.Overlay, _ []byte) []byte {
 // this should be good enough (no need for concensus - should naurally come to concenus as each node manages it's own
 // participant list
 func heartbeat(overlayInterface node.Overlay) {
-	pcg := overlayInterface.(*PCG)
+	pcg := overlayInterface.(*Peer)
 	for {
 		manageParticipants(pcg)
-		time.Sleep(time.Second * 30)
+		// fmt.Println("My heart beats for you")
+		time.Sleep(time.Second * 5)
 	}
 }
 
-func manageParticipants(pcg *PCG) {
+func manageParticipants(pcg *Peer) {
 	for id, group := range pcg.Groups() { // for all my groups
 		// check status of each participant in group
 		for _, participant := range group.Participants() {
@@ -73,22 +82,34 @@ func manageParticipants(pcg *PCG) {
 			}
 			// if in group our list of participants is correct
 		}
-		if len(group.Participants()) < 3 {
+		print(len(group.Participants()))
+		if len(group.Participants()) < 3 { //FIx this as if findParticipants already running then it'll make multiple
 			go findParticipants(pcg, &group) // group is in a fragile unhappy state - find more participants
 		}
 	}
 }
 
-func findParticipants(pcg *PCG, group *Group) {
+func findParticipants(pcg *Peer, group *Group) {
+	// fmt.Print("finding!")
 	for { // runs until a partipant is found - then breaks out of loop
 		for _, host := range pcg.Node().KnownHosts() {
 			// ask if they would like to join the group i.e. if they have capacity
-			repsones, err := utils.Request(host, []byte(canJoinUri), nil)
-			if err != nil || string(repsones) != "no storage available" {
+			response, err := utils.Request(host, []byte(canJoinUri), nil)
+			// fmt.Println(string(response))
+			if err != nil || string(response) == "no storage available" {
 				// too bad
-			}
-			if string(repsones) == "storage available" {
+				fmt.Print("life is sad")
+			} 
+			
+			if string(response) == "accepted" {
 				group.AddParticipant(host)
+
+				//Send message to host that we want him to be added to our group
+				
+				if len(group.Participants()) == 3 {
+					break
+					return // this instead maybe? no need for second check later
+				}
 			}
 		}
 		// if that doesn't work - ask other participants in group if they know
@@ -100,8 +121,10 @@ func findParticipants(pcg *PCG, group *Group) {
 
 		// do this until a participant is found - so if doen't work first time try
 		// again - if group particpants becomes 3 then break
-
-		time.Sleep(time.Second * 30)
+		if len(group.Participants()) == 3 {
+			break
+		}
+		time.Sleep(time.Second * 5)
 	}
 
 }
