@@ -3,10 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"os"
+
 	"github.com/a-shine/butter"
 	"github.com/a-shine/butter/node"
 	"github.com/a-shine/cs347-cw/pcg"
-	"os"
 )
 
 func add(overlay *pcg.Peer) {
@@ -31,6 +32,7 @@ func printAll(peer *pcg.Peer) {
 
 func interact(overlayInterface node.Overlay) {
 	peer := overlayInterface.(*pcg.Peer)
+	fmt.Println("Sock addr: ", peer.Node().SocketAddr())
 	for {
 		// prompt to pcgStore or pcgRetrieve information
 		var interactionType string

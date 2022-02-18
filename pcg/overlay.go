@@ -13,7 +13,7 @@ type Peer struct {
 	node           *node.Node
 	maxStorage     uint64 //TODO will be in node
 	currentStorage uint64 //TODO will be in node
-	storage        map[[32]byte]Group
+	storage        map[[32]byte]*Group
 }
 
 func (o *Peer) Node() *node.Node {
@@ -33,26 +33,27 @@ func (p *Peer) NewGroup(data string) string {
 }
 
 // Group from the node's storage by its UUID. If the block is not found, an empty block with an error is returned.
-func (o *Peer) Group(id string) (Group, error) {
+func (o *Peer) Group(id string) (*Group, error) {
 	var hash [32]byte
 	data, _ := hex.DecodeString(id)
 	copy(hash[:], data)
-	if val, ok := o.storage[hash]; ok {
-		return val, nil
+	if group, ok := o.storage[hash]; ok {
+		return group, nil
 	}
-	return Group{}, errors.New("block not found")
+	return nil, errors.New("block not found")
 }
 
-func (o *Peer) Groups() map[[32]byte]Group {
+func (o *Peer) Groups() map[[32]byte]*Group {
 	return o.storage
 }
 
 /* Join PCG group
  * TODO UPDATE TO GROUP DIGEST WHEN GROUP MODIFIED */
 func (p *Peer) JoinGroup(g Group) {
-	fmt.Println(g.String())
+	// fmt.Println(g.String())
 	hsha2 := sha256.Sum256([]byte(g.String()))
-	p.storage[hsha2] = g
+	g.AddParticipant(p.node.SocketAddr())
+	p.storage[hsha2] = &g
 }
 
 func MbToBytes(mb uint64) uint64 {
@@ -70,7 +71,7 @@ func NewPCG(node *node.Node, maxMemoryMb uint64) Peer {
 	return Peer{
 		node:       node,
 		maxStorage: maxStorage,
-		storage:    make(map[[32]byte]Group),
+		storage:    make(map[[32]byte]*Group),
 	}
 }
 
