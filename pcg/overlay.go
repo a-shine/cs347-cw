@@ -5,14 +5,15 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+
 	"github.com/a-shine/butter/node"
 )
 
 type Peer struct {
-	node       *node.Node
-	maxStorage uint64
-	currentStorage uint64
-	storage    map[[32]byte]Group
+	node           *node.Node
+	maxStorage     uint64 //TODO will be in node
+	currentStorage uint64 //TODO will be in node
+	storage        map[[32]byte]Group
 }
 
 func (o *Peer) Node() *node.Node {
@@ -21,13 +22,13 @@ func (o *Peer) Node() *node.Node {
 
 // AddGroup to the node's storage. A UUID is generated for every bit of information added to the network (no update
 // functionality yet!). Returns the UUID of the new block as a string.
-func (p *Peer) AddGroup(data string) string {
+func (p *Peer) NewGroup(data string) string {
 	// check if node memory (allocated by the user on initialization) is full - node API
 	hsha2 := sha256.Sum256([]byte(data))
 	var formattedData [4096]byte
 	copy(formattedData[:], data)
 	p.storage[hsha2] = NewGroup(formattedData, p.node.SocketAddr())
-	p.currentStorage+=4096 //TODO
+	p.currentStorage += 4096 //TODO
 	return fmt.Sprintf("%x", hsha2)
 }
 
@@ -44,6 +45,14 @@ func (o *Peer) Group(id string) (Group, error) {
 
 func (o *Peer) Groups() map[[32]byte]Group {
 	return o.storage
+}
+
+/* Join PCG group
+ * TODO UPDATE TO GROUP DIGEST WHEN GROUP MODIFIED */
+func (p *Peer) JoinGroup(g Group) {
+	fmt.Println(g.String())
+	hsha2 := sha256.Sum256([]byte(g.String()))
+	p.storage[hsha2] = g
 }
 
 func MbToBytes(mb uint64) uint64 {
@@ -69,6 +78,6 @@ func (p *Peer) String() string {
 	str := ""
 	for _, g := range p.Groups() {
 		str = str + g.String()
-	}	
+	}
 	return fmt.Sprintf("%s", str)
 }

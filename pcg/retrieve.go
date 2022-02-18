@@ -2,6 +2,7 @@ package pcg
 
 import (
 	"fmt"
+
 	"github.com/a-shine/butter/node"
 	"github.com/a-shine/butter/utils"
 )
@@ -10,7 +11,7 @@ func retrieve(overlay node.Overlay, query []byte) []byte {
 	persistOverlay := overlay.(*Peer)
 	block, err := persistOverlay.Group(string(query))
 	if err == nil {
-		return append([]byte("found/"), block.Data()...)
+		return append([]byte("found/"), block.Data[:]...)
 	}
 
 	hostsStruct := persistOverlay.Node().KnownHostsStruct()
@@ -40,7 +41,7 @@ func NaiveRetrieve(overlay *Peer, query string) []byte {
 	// else BFS (pass the query on to all known hosts (partial view)
 	block, err := overlay.Group(query)
 	if err == nil {
-		return block.Data()
+		return block.Data[:]
 	}
 	return bfs(overlay, query)
 }
