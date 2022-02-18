@@ -46,7 +46,8 @@ func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
 		//Start go routine that will add me to the group that has been requested
 
 		//Parse payload to get the group which I'm supposed to join :)
-		
+		var groupDigest Group //TODO update to group digest struct
+		json.UnMarshall(payload)
 
 		go 
 		return []byte("accept")

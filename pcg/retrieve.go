@@ -72,4 +72,5 @@ func bfs(overlay *Peer, query string) []byte {
 		queue = append(queue, remoteKnownHosts...) // add the remote hosts to the end of the queue
 	}
 	return []byte("Information is not on the network")
+	
 }
