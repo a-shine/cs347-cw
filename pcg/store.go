@@ -160,7 +160,6 @@ func findParticipants(pcg *Peer, group *Group) {
 				//Send message to host that we want him to be added to our group
 				if len(group.Participants) == 3 {
 					break
-					return // this instead maybe? no need for second check later
 				}
 			}
 		}
@@ -173,10 +172,11 @@ func findParticipants(pcg *Peer, group *Group) {
 
 		// do this until a participant is found - so if doen't work first time try
 		// again - if group particpants becomes 3 then break
+
+		time.Sleep(time.Second * 5)
 		if len(group.Participants) == 3 {
 			break
 		}
-		time.Sleep(time.Second * 5)
 	}
 	alreadyFinding = false
 }
