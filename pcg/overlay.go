@@ -80,5 +80,5 @@ func (p *Peer) String() string {
 	for _, g := range p.Groups() {
 		str = str + g.String()
 	}
-	return fmt.Sprintf("%s", str)
+	return str
 }

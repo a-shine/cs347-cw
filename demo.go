@@ -15,7 +15,12 @@ func add(overlay *pcg.Peer) {
 	in := bufio.NewReader(os.Stdin)
 	data, _ := in.ReadString('\n') // Read string up to newline
 	uuid := pcg.PCGStore(overlay, data)
+	clear()
 	fmt.Println("UUID:", uuid)
+	fmt.Println("Data:", data)
+	fmt.Println("Enter to continue...")
+	in.ReadString('\n')
+	clear()
 }
 
 func retrieve(overlay *pcg.Peer) {
@@ -23,11 +28,19 @@ func retrieve(overlay *pcg.Peer) {
 	in := bufio.NewReader(os.Stdin)
 	uuid, _ := in.ReadString('\n') // Read string up to newline
 	data := pcg.NaiveRetrieve(overlay, uuid)
+	clear()
 	fmt.Println(string(data))
+	fmt.Println("Enter to continue...")
+	in.ReadString('\n')
+	clear()
 }
 
 func printAll(peer *pcg.Peer) {
 	fmt.Println(peer.String())
+	fmt.Println("Enter to continue...")
+	in := bufio.NewReader(os.Stdin)
+	in.ReadString('\n')
+	clear()
 }
 
 func interact(overlayInterface node.Overlay) {
@@ -38,7 +51,7 @@ func interact(overlayInterface node.Overlay) {
 		var interactionType string
 		fmt.Print("add(1) or pcgRetrieve(2) or All My IDs(3) information?")
 		fmt.Scanln(&interactionType)
-
+		clear()
 		switch interactionType {
 		case "1":
 			add(peer)
@@ -61,4 +74,8 @@ func main() {
 	pcg.AppendGroupStoreBehaviour(overlay.Node())
 
 	butter.Spawn(&overlay, false)
+}
+
+func clear() {
+	fmt.Print("\033[H\033[2J")
 }

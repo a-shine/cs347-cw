@@ -97,11 +97,11 @@ func (p *Peer) amILeader(g *Group) bool {
 }
 
 func manageParticipants(peer *Peer) {
-	fmt.Println("Num groups", len(peer.Groups()))
+	//fmt.Println("Num groups", len(peer.Groups()))
 
 	for id, group := range peer.Groups() { // for all my groups
 		// check status of each participant in group
-		fmt.Println(group.Participants)
+		//fmt.Println(group.Participants)
 		for _, participant := range group.Participants {
 			// if participant is not alive
 			responce, err := utils.Request(participant, []byte(inGroupUri), id[:])

@@ -1,6 +1,7 @@
 package pcg
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -40,13 +41,6 @@ func (g *Group) AddParticipant(host utils.SocketAddr) error {
 
 }
 
-func removeSockAddrSlice(s []utils.SocketAddr, i int) []utils.SocketAddr {
-	s[i] = s[len(s)-1]
-	s = s[:len(s)-1]
-	fmt.Println("in remov", s)
-	return s
-}
-
 func (g *Group) RemoveParticipant(host utils.SocketAddr) error {
 	fmt.Println("Removing:", host, "from a group")
 	for i, participant := range g.Participants {
@@ -60,10 +54,6 @@ func (g *Group) RemoveParticipant(host utils.SocketAddr) error {
 			return errors.New("host not in group")
 		}
 	}
-
-	// fmt.Println("HEREERRERE")
-	// g.Participants = removeSockAddrSlice(g.Participants, i)
-	// fmt.Println(g.Participants)
 	return nil
 }
 
@@ -75,9 +65,5 @@ func NewGroup(data [4096]byte, participant utils.SocketAddr) *Group {
 }
 
 func (g *Group) String() string {
-	return string(g.Data[:])
-}
-
-func (g *Group) numPart() int {
-	return len(g.Participants)
+	return fmt.Sprintf("Data: %sGroup Members: %v\nUUID: %x\n\n", g.Data[:], g.Participants, sha256.Sum256(g.Data[:]))
 }
