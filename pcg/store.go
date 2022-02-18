@@ -51,13 +51,6 @@ func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
 		//Start go routine that will add me to the group that has been requested
 
 		//Parse payload to get the group which I'm supposed to join :)
-<<<<<<< HEAD
-		var groupDigest Group //TODO update to group digest struct
-		json.UnMarshall(payload)
-
-		go 
-		return []byte("accept")
-=======
 		var groupDigest Group //TODO update to group Digest struct once group has been filled out further
 		err := json.Unmarshal(payload, &groupDigest)
 		if err != nil {
@@ -67,11 +60,11 @@ func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
 		peer.JoinGroup(groupDigest)
 		fmt.Println("Joined someones group")
 		return []byte("accepted")
->>>>>>> 3a6c71c6f4d4faa835abc3ade5eefaa1250d4c96
 	}
 	// if len > cap this should never happen - we should not use more memory
 	// than we have allocated to the node at runtime
 	return []byte("can't join group")
+
 }
 
 // --- Client behaviours ---
