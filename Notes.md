@@ -2,6 +2,13 @@
 
 ^^ Title subject to change
 
+## TODO
+
+* Change find peers stuff to be small request, then if accepted then join the network with the group Digest stuff
+* 
+
+
+
 ## Keywords
 
 We need consistency with our terminology.

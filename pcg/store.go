@@ -43,10 +43,10 @@ func inGroup(overlayInterface node.Overlay, groupId []byte) []byte {
 
 func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
 	peer := overlayInterface.(*Peer)
-	fmt.Println(string(payload))
+	// fmt.Println(string(payload))
 	// if len(node.Groups()) vs cap(node.Groups()) if len == cap the unable to
 	// store more groups if len < cap the able to store more groups
-	fmt.Println("I'm can join")
+	// fmt.Println("I'm can join")
 	if peer.currentStorage < peer.maxStorage {
 		//Start go routine that will add me to the group that has been requested
 
@@ -54,11 +54,11 @@ func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
 		var groupDigest Group //TODO update to group Digest struct once group has been filled out further
 		err := json.Unmarshal(payload, &groupDigest)
 		if err != nil {
-			fmt.Println("erroe marchallng grou")
+			fmt.Println("error marchallng group")
 		}
-		fmt.Println(groupDigest.String())
+		// fmt.Println(groupDigest.String())
 		peer.JoinGroup(groupDigest)
-		fmt.Println("Joined someones group")
+		// fmt.Println("Joined someones group")
 		return []byte("accepted")
 	}
 	// if len > cap this should never happen - we should not use more memory
@@ -73,10 +73,9 @@ func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
 // this should be good enough (no need for concensus - should naurally come to concenus as each node manages it's own
 // participant list
 func heartbeat(overlayInterface node.Overlay) {
-	pcg := overlayInterface.(*Peer)
+	pcgn := overlayInterface.(*Peer)
 	for {
-		manageParticipants(pcg)
-		fmt.Println("Num groups", len(pcg.Groups()))
+		manageParticipants(pcgn)
 		time.Sleep(time.Second * 5)
 	}
 }
@@ -97,20 +96,24 @@ func (p *Peer) amILeader(g *Group) bool {
 	return true
 }
 
-func manageParticipants(pcg *Peer) {
-	for id, group := range pcg.Groups() { // for all my groups
+func manageParticipants(peer *Peer) {
+	fmt.Println("Num groups", len(peer.Groups()))
+
+	for id, group := range peer.Groups() { // for all my groups
 		// check status of each participant in group
+		fmt.Println(group.Participants)
 		for _, participant := range group.Participants {
 			// if participant is not alive
-			repsonce, err := utils.Request(participant, []byte(inGroupUri), id[:])
+			responce, err := utils.Request(participant, []byte(inGroupUri), id[:])
 			// remove participant
-			if err != nil || string(repsonce) != "Group not found" {
+			if err != nil || string(responce) != "Group not found" {
 				group.RemoveParticipant(participant)
+				fmt.Println(group.Participants)
 			}
 			// if in group our list of participants is correct
 		}
-		if pcg.amILeader(&group) && ((len(group.Participants)) < 3) && !alreadyFinding { //FIx this as if findParticipants already running then it'll make multiple
-			go findParticipants(pcg, &group) // group is in a fragile unhappy state - find more participants
+		if peer.amILeader(group) && ((len(group.Participants)) < 3) && !alreadyFinding { //FIx this as if findParticipants already running then it'll make multiple
+			go findParticipants(peer, group) // group is in a fragile unhappy state - find more participants
 		}
 	}
 }
@@ -134,22 +137,27 @@ func findParticipants(pcg *Peer, group *Group) {
 			}
 			// ask if they would like to join the group i.e. if they have capacity
 			output, err := json.Marshal(group)
-			fmt.Println(string(output))
+			// fmt.Println(string(output))
 			if err != nil {
 				break
 			}
 			response, err := utils.Request(host, []byte(canJoinUri), output)
-			// fmt.Println(string(response))
+			fmt.Println(string(response))
 			if err != nil || string(response) == "no storage available" {
 				// too bad
-				fmt.Print("life is sad")
+				fmt.Println(err)
+				fmt.Println("life is sad")
 			}
 
 			if string(response) == "accepted" {
-				group.AddParticipant(host)
+				fmt.Println("adding:", host)
+				// fmt.Printf("%p", &group.Participants)
+				err := group.AddParticipant(host)
+				if err != nil {
+					fmt.Println(err)
+				}
 
 				//Send message to host that we want him to be added to our group
-
 				if len(group.Participants) == 3 {
 					break
 					return // this instead maybe? no need for second check later
