@@ -5,6 +5,8 @@
 ## TODO
 
 * Change find peers stuff to be small request, then if accepted then join the network with the group Digest stuff
+* change leader election function to avoid reliance on high ID stuff
+* information retrieval is a request service (broadcast to group the existence of this request) (add to group struct a series of requests that exist)
 * 
 
 
