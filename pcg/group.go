@@ -65,5 +65,5 @@ func NewGroup(data [4096]byte, participant utils.SocketAddr) *Group {
 }
 
 func (g *Group) String() string {
-	return fmt.Sprintf("Data: %sGroup Members: %v\nUUID: %x\n\n", g.Data[:], g.Participants, sha256.Sum256(g.Data[:]))
+	return fmt.Sprintf("Data: %s\nGroup Members: %v\nUUID: %x\n\n", g.Data[:], g.Participants, sha256.Sum256(g.Data[:]))
 }

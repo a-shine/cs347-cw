@@ -41,6 +41,7 @@ func NaiveRetrieve(overlay *Peer, query string) []byte {
 
 	// do I have this information, if so return it
 	// else BFS (pass the query on to all known hosts (partial view)
+	fmt.Println("Retieve called")
 	block, err := overlay.Group(query)
 	if err == nil {
 		return block.Data[:]

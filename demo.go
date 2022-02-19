@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/a-shine/butter"
 	"github.com/a-shine/butter/node"
@@ -14,10 +15,10 @@ func add(overlay *pcg.Peer) {
 	fmt.Println("Input information:")
 	in := bufio.NewReader(os.Stdin)
 	data, _ := in.ReadString('\n') // Read string up to newline
-	uuid := pcg.PCGStore(overlay, data)
+	uuid := pcg.PCGStore(overlay, strings.TrimSpace(data))
 	clear()
 	fmt.Println("UUID:", uuid)
-	fmt.Println("Data:", data)
+	fmt.Println("Data:", strings.TrimSpace(data))
 	fmt.Println("Enter to continue...")
 	in.ReadString('\n')
 	clear()
@@ -27,7 +28,7 @@ func retrieve(overlay *pcg.Peer) {
 	fmt.Println("Information UUID:")
 	in := bufio.NewReader(os.Stdin)
 	uuid, _ := in.ReadString('\n') // Read string up to newline
-	data := pcg.NaiveRetrieve(overlay, uuid)
+	data := pcg.NaiveRetrieve(overlay, strings.TrimSpace(uuid))
 	clear()
 	fmt.Println(string(data))
 	fmt.Println("Enter to continue...")

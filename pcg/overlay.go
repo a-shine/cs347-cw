@@ -24,9 +24,9 @@ func (o *Peer) Node() *node.Node {
 // functionality yet!). Returns the UUID of the new block as a string.
 func (p *Peer) NewGroup(data string) string {
 	// check if node memory (allocated by the user on initialization) is full - node API
-	hsha2 := sha256.Sum256([]byte(data))
 	var formattedData [4096]byte
 	copy(formattedData[:], data)
+	hsha2 := sha256.Sum256(formattedData[:])
 	p.storage[hsha2] = NewGroup(formattedData, p.node.SocketAddr())
 	p.currentStorage += 4096 //TODO
 	return fmt.Sprintf("%x", hsha2)
@@ -50,8 +50,8 @@ func (o *Peer) Groups() map[[32]byte]*Group {
 /* Join PCG group
  * TODO UPDATE TO GROUP DIGEST WHEN GROUP MODIFIED */
 func (p *Peer) JoinGroup(g Group) {
-	// fmt.Println(g.String())
-	hsha2 := sha256.Sum256([]byte(g.String()))
+	//fmt.Println(g.String())
+	hsha2 := sha256.Sum256(g.Data[:])
 	g.AddParticipant(p.node.SocketAddr())
 	p.storage[hsha2] = &g
 }
