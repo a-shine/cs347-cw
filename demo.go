@@ -67,10 +67,10 @@ func interact(overlayInterface node.Overlay) {
 }
 
 func main() {
-	butterNode, _ := node.NewNode(0, 512, false)
+	butterNode, _ := node.NewNode(0, 512)
 	butterNode.RegisterClientBehaviour(interact)
 
-	overlay := pcg.NewPCG(&butterNode, 512) // Creates a new overlay network
+	overlay := pcg.NewPCG(butterNode, 512) // Creates a new overlay network
 	pcg.AppendRetrieveBehaviour(overlay.Node())
 	pcg.AppendGroupStoreBehaviour(overlay.Node())
 

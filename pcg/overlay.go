@@ -16,6 +16,10 @@ type Peer struct {
 	storage        map[[32]byte]*Group
 }
 
+func (p *Peer) AvailableStorage() uint64 {
+	return p.maxStorage - p.currentStorage
+}
+
 func (o *Peer) Node() *node.Node {
 	return o.node
 }

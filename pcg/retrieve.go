@@ -15,7 +15,7 @@ func retrieve(overlay node.Overlay, query []byte) []byte {
 	}
 
 	hostsStruct := persistOverlay.Node().KnownHostsStruct()
-	knownHostsJson, _ := hostsStruct.ToJson()
+	knownHostsJson := hostsStruct.JsonDigest() // TODO: need to fix this
 	return append([]byte("try/"), knownHostsJson...)
 }
 
@@ -54,7 +54,7 @@ func bfs(overlay *Peer, query string) []byte {
 	// Initialise an empty queue
 	queue := make([]utils.SocketAddr, 0)
 	// Add all my known hosts to the queue
-	for _, host := range overlay.Node().KnownHosts() {
+	for host, _ := range overlay.Node().KnownHosts() {
 		queue = append(queue, host)
 	}
 	for len(queue) > 0 {

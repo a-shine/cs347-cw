@@ -131,7 +131,7 @@ func findParticipants(pcg *Peer, group *Group) {
 	alreadyFinding = true
 	// fmt.Print("finding!")
 	for { // runs until a partipant is found - then breaks out of loop
-		for _, host := range pcg.Node().KnownHosts() {
+		for host, _ := range pcg.Node().KnownHosts() {
 			if GroupContains(group.Participants, host) {
 				continue
 			}
