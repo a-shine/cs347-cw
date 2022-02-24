@@ -2,7 +2,7 @@ module github.com/a-shine/cs347-cw
 
 go 1.17
 
-require github.com/a-shine/butter v0.0.0-20220223180833-1039882176c4
+require github.com/a-shine/butter v0.0.0-20220224083200-e814d76b08be
 
 require (
 	github.com/jordwest/mock-conn v0.0.0-20180617021051-4896c6bd1641 // indirect

@@ -1,5 +1,5 @@
-github.com/a-shine/butter v0.0.0-20220223180833-1039882176c4 h1:KxR+WQXluErnPw7Qc7/bZfdQ3qitC6AQlfCuOK58FWE=
-github.com/a-shine/butter v0.0.0-20220223180833-1039882176c4/go.mod h1:xP/flI+MRbofiv6JoUlhZqGRvNiPLi5Jt2sZ9dVkH8o=
+github.com/a-shine/butter v0.0.0-20220224083200-e814d76b08be h1:rwLSmo3SxRCooGhullpVBDWSOxm/pvhyz9OyypvTQpM=
+github.com/a-shine/butter v0.0.0-20220224083200-e814d76b08be/go.mod h1:xP/flI+MRbofiv6JoUlhZqGRvNiPLi5Jt2sZ9dVkH8o=
 github.com/jordwest/mock-conn v0.0.0-20180617021051-4896c6bd1641 h1:ChkB2s4mFDekyUUmbNE7qNhennP0rfqF2YZUOGxbhFk=
 github.com/jordwest/mock-conn v0.0.0-20180617021051-4896c6bd1641/go.mod h1:AJFEOPtj5Z5z3MAy+0uvjQAH02iRnQr6fnvuHYp/Jek=
 github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d/go.mod h1:YUTz3bUH2ZwIWBy3CJBeOBEugqcmXREj14T+iG/4k4U=
