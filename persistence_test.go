@@ -40,7 +40,7 @@ func TestNoFailure(t *testing.T) {
 func addRandomData(overlayInterface node.Overlay) {
 	peer := overlayInterface.(*pcg.Peer)
 	fmt.Println("Sock addr: ", peer.Node().SocketAddr())
-	pcg.PCGStore(peer, String(100))
+	pcg.Store(peer, String(100))
 }
 
 func createNode() {

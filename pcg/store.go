@@ -15,18 +15,18 @@ const (
 	canJoinUri = "can-join?/"
 )
 
-func PCGStore(overlay *Peer, data string) string {
+var alreadyFinding bool
+
+// Store information on the network using PCG
+func Store(overlay *Peer, data string) string {
 	uuid := overlay.CreateGroup(data)
 	return uuid
 }
-
-var alreadyFinding bool
 
 // AppendGroupStoreBehaviour registers the behaviours that allow the node to work with the pcg overlay
 func AppendGroupStoreBehaviour(node *node.Node) {
 	node.RegisterServerBehaviour(inGroupUri, inGroup)
 	node.RegisterServerBehaviour(canJoinUri, canJoin)
-
 	node.RegisterClientBehaviour(heartbeat)
 }
 
@@ -67,10 +67,10 @@ func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
 
 }
 
-// --- Client behaviours ---
+// --- Client behaviour ---
 
-// Each node is responsible for managing his own list of group participants - as long as it is done faily effectively
-// this should be good enough (no need for concensus - should naurally come to concenus as each node manages it's own
+// Each node is responsible for managing his own list of group participants - as long as it is done fairly effectively
+// this should be good enough (no need for consensus - should naturally come to consensus as each node manages its own
 // participant list
 func heartbeat(overlayInterface node.Overlay) {
 	pcgn := overlayInterface.(*Peer)

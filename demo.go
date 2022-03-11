@@ -15,7 +15,7 @@ func add(overlay *pcg.Peer) {
 	fmt.Println("Input information:")
 	in := bufio.NewReader(os.Stdin)
 	data, _ := in.ReadString('\n') // Read string up to newline
-	uuid := pcg.PCGStore(overlay, strings.TrimSpace(data))
+	uuid := pcg.Store(overlay, strings.TrimSpace(data))
 	clear()
 	fmt.Println("UUID:", uuid)
 	fmt.Println("Data:", strings.TrimSpace(data))

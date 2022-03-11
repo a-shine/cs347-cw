@@ -10,38 +10,41 @@ import (
 	"github.com/a-shine/butter/utils"
 )
 
+// retrieve behaviour for a PCG node. When queried, it will either return the information if it is part of the group
+// responsible for hosting it, else it will return its known hosts so that the querying node can continue querying the
+// network.
 func retrieve(overlay node.Overlay, query []byte) []byte {
 	persistOverlay := overlay.(*Peer)
 	block, err := persistOverlay.Group(string(query))
 	if err == nil {
 		return append([]byte("found/"), block.Data[:]...)
 	}
-
 	hostsStruct := persistOverlay.Node().KnownHostsStruct()
 	knownHostsJson := hostsStruct.JsonDigest() // TODO: need to fix this
 	return append([]byte("try/"), knownHostsJson...)
 }
 
+// AppendRetrieveBehaviour to the Butter node (much like registering an http route in a tradition backend web framework)
 func AppendRetrieveBehaviour(node *node.Node) {
 	node.RegisterServerBehaviour("pcgRetrieve/", retrieve)
 }
 
-// NaiveRetrieve High level entrypoint for searching for a specific piece of information on the network
-// look if I have the information else look at the most likely known host to get to that information
-// one query per piece of information (one-to-one) hence the query has to be unique i.e i.d.
+// NaiveRetrieve entrypoint to search for a specific piece of information on the network by UUID (information hash)
 func NaiveRetrieve(overlay *Peer, query string) []byte {
+	// Look if I have the information, else query known hosts for information
+	// One query per piece of information (one-to-one) hence the query has to be unique i.e i.d.
 
 	// do I have this information, if so return it
 	// else BFS (pass the query on to all known hosts (partial view)
-	fmt.Println("Retieve called")
 	block, err := overlay.Group(query)
 	if err == nil {
 		return block.Data[:]
 	}
-
 	return bfs(overlay, query)
 }
 
+// bfs across the network until information is found. This is not particularly well suited to production and won't scale
+// well. However, for testing it provides a deterministic means of checking if information exists on the network.
 func bfs(overlay *Peer, query string) []byte {
 	// Initialise an empty queue
 	queue := make([]utils.SocketAddr, 0)
@@ -69,5 +72,4 @@ func bfs(overlay *Peer, query string) []byte {
 		queue = append(queue, remoteKnownHosts...) // add the remote hosts to the end of the queue
 	}
 	return []byte("Information is not on the network")
-
 }
