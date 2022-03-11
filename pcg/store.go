@@ -32,6 +32,7 @@ func AppendGroupStoreBehaviour(node *node.Node) {
 
 // --- Server behaviours (can be thought of as questions) ---
 
+// inGroup is a server behaviour that allows a querying node to ask a given node if it is in a group
 func inGroup(overlayInterface node.Overlay, groupId []byte) []byte {
 	pcg := overlayInterface.(*Peer)
 	_, err := pcg.Group(string(groupId))
@@ -41,6 +42,8 @@ func inGroup(overlayInterface node.Overlay, groupId []byte) []byte {
 	return []byte("Group member")
 }
 
+// canJoin is a server behaviour that allows a querying node to ask a given node if it has the memory capacity to join
+// a group
 func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
 	peer := overlayInterface.(*Peer)
 	// fmt.Println(string(payload))
@@ -69,9 +72,9 @@ func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
 
 // --- Client behaviour ---
 
-// Each node is responsible for managing his own list of group participants - as long as it is done fairly effectively
-// this should be good enough (no need for consensus - should naturally come to consensus as each node manages its own
-// participant list
+// Each participant is responsible for managing his own list of group participants - as long as it is done fairly
+// effectively this should be good enough (no need for consensus - should naturally come to consensus as each node
+// manages its own participant list)
 func heartbeat(overlayInterface node.Overlay) {
 	pcgn := overlayInterface.(*Peer)
 	for {
@@ -80,6 +83,7 @@ func heartbeat(overlayInterface node.Overlay) {
 	}
 }
 
+// Allows a node to determine if he is th leader of a group
 func (p *Peer) amILeader(g *Group) bool {
 	socketAddr := p.Node().SocketAddr()
 	socketAddrStr := socketAddr.ToString()
@@ -97,17 +101,18 @@ func (p *Peer) amILeader(g *Group) bool {
 }
 
 func manageParticipants(peer *Peer) {
-	//fmt.Println("Num groups", len(peer.Groups()))
-
 	for id, group := range peer.Groups() { // for all my groups
 		// check status of each participant in group
 		//fmt.Println(group.Participants)
 		for _, participant := range group.Participants {
 			// if participant is not alive
-			responce, err := utils.Request(participant, []byte(inGroupUri), id[:])
+			response, err := utils.Request(participant, []byte(inGroupUri), id[:])
 			// remove participant
-			if err != nil || string(responce) != "Group not found" {
-				group.RemoveParticipant(participant)
+			if err != nil || string(response) != "Group not found" {
+				err := group.RemoveParticipant(participant)
+				if err != nil {
+					fmt.Println("Error removing participant:", err)
+				}
 				fmt.Println(group.Participants)
 			}
 			// if in group our list of participants is correct
