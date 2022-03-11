@@ -33,33 +33,36 @@ func NewPCG(node *node.Node, maxMemoryMb uint64) Peer {
 
 // --- Getters ---
 
-func (o *Peer) Node() *node.Node {
-	return o.node
+func (p *Peer) Node() *node.Node { // Required to implement the Butter overlay interface
+	return p.node
 }
 
-func (p *Peer) AvailableStorage() uint64 {
+func (p *Peer) AvailableStorage() uint64 { // Required to implement the Butter overlay interface
 	return p.maxStorage - p.currentStorage
 }
 
-// Group from the node's storage by its UUID. If the block is not found, an empty block with an error is returned.
-func (o *Peer) Group(id string) (*Group, error) {
+// Group from node's storage by its UUID. If the node is not part of that group, returns nil with an error.
+func (p *Peer) Group(id string) (*Group, error) {
 	var hash [32]byte
 	data, _ := hex.DecodeString(id)
 	copy(hash[:], data)
-	if group, ok := o.storage[hash]; ok {
+	if group, ok := p.storage[hash]; ok {
 		return group, nil
 	}
 	return nil, errors.New("block not found")
 }
 
-func (o *Peer) Groups() map[[32]byte]*Group {
-	return o.storage
+// Groups from node's storage by their UUIDs
+func (p *Peer) Groups() map[[32]byte]*Group {
+	return p.storage
 }
 
-// CreateGroup to the node's storage. A UUID is generated for every bit of information added to the network (no update
-// functionality yet!). Returns the UUID of the new block as a string.
+// --- Node Group creation and joining ---
+
+// CreateGroup with node. A UUID is generated for every bit of information added to the network (no update
+// functionality yet!). Returns the UUID of the new group as a string.
 func (p *Peer) CreateGroup(data string) string {
-	// check if node memory (allocated by the user on initialization) is full - node API
+	// TODO: check if node memory (allocated by the user on initialization) is full - node API
 	var formattedData [4096]byte
 	copy(formattedData[:], data)
 	hsha2 := sha256.Sum256(formattedData[:])
@@ -68,15 +71,20 @@ func (p *Peer) CreateGroup(data string) string {
 	return fmt.Sprintf("%x", hsha2)
 }
 
-/* Join PCG group
- * TODO UPDATE TO GROUP DIGEST WHEN GROUP MODIFIED */
+// JoinGroup from a node
 func (p *Peer) JoinGroup(g Group) {
-	//fmt.Println(g.String())
+	//TODO: UPDATE TO GROUP DIGEST WHEN GROUP MODIFIED
 	hsha2 := sha256.Sum256(g.Data[:])
-	g.AddParticipant(p.node.SocketAddr())
+	err := g.AddParticipant(p.node.SocketAddr())
+	if err != nil {
+		fmt.Println("Unable to join group:", err)
+	}
 	p.storage[hsha2] = &g
 }
 
+// --- Encoders ---
+
+// String of node's groups
 func (p *Peer) String() string {
 	str := ""
 	for _, g := range p.Groups() {

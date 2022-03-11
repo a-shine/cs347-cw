@@ -1,3 +1,6 @@
+// Pulled and modified from Butter's original implementation of Information Retrieval
+// (https://github.com/a-shine/butter/blob/main/retrieve/retrieve.go commit 20ffb299fb196bfe0386ee8ab02987b0fc5e0119)
+
 package pcg
 
 import (
@@ -19,19 +22,8 @@ func retrieve(overlay node.Overlay, query []byte) []byte {
 	return append([]byte("try/"), knownHostsJson...)
 }
 
-func found(node *node.Node, query []byte) []byte {
-	return query
-
-}
-
-func try(node *node.Node, query []byte) []byte {
-	return query
-}
-
 func AppendRetrieveBehaviour(node *node.Node) {
 	node.RegisterServerBehaviour("pcgRetrieve/", retrieve)
-	//node.RegisterServerBehaviour("found/", found)
-	//node.RegisterServerBehaviour("try/", try)
 }
 
 // NaiveRetrieve High level entrypoint for searching for a specific piece of information on the network
@@ -54,7 +46,7 @@ func bfs(overlay *Peer, query string) []byte {
 	// Initialise an empty queue
 	queue := make([]utils.SocketAddr, 0)
 	// Add all my known hosts to the queue
-	for host, _ := range overlay.Node().KnownHosts() {
+	for host := range overlay.Node().KnownHosts() {
 		queue = append(queue, host)
 	}
 	for len(queue) > 0 {

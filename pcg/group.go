@@ -63,6 +63,8 @@ func (g *Group) RemoveParticipant(host utils.SocketAddr) error {
 	return nil
 }
 
+// --- Encoders ---
+
 // ToJson returns a JSON representation of the group
 func (g *Group) ToJson() []byte {
 	groupJson, _ := json.Marshal(g)
