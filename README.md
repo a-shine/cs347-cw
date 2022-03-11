@@ -1,4 +1,14 @@
 # CS347 coursework
+
+## Try demo
+To try a demo of the PCG persistent storage management overlay in action:
+1. Make sure to have Go installed
+2. Clone the repository
+3. Run the demo blog cli program with
+`````bash
+go run demo.go
+`````
+
 Building a custom overlay network on top of the a-shine/butter framework (unstructured p2p application framework) focused on implementing group based persistent data management techniques to improve fault-tolerance (specifically information availability) on high churn networks.
 
 Keywords: data redundancy, data consistency/availability, unstructured peer-to-peer, decentralised persistent data
