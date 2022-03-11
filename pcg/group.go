@@ -8,39 +8,45 @@ import (
 	"unsafe"
 
 	"github.com/a-shine/butter/utils"
-	// "fmt"
 )
 
-const GroupSize = unsafe.Sizeof(Group{})
-const ReplicationCount = 3
-const ParticipantCount = ReplicationCount
+const GroupStructSize = unsafe.Sizeof(Group{})
+const DataReplicationCount = 3
+const ParticipantCount = DataReplicationCount // Number of participants that a group optimises for (alias for data replication count)
 
+// A Group is a collection of nodes and the data that they are responsible for maintaining
 type Group struct {
 	Participants []utils.SocketAddr
 	Data         [4096]byte
 }
 
+// -- Constructor ---
+
+func NewGroup(data [4096]byte, participant utils.SocketAddr) *Group {
+	return &Group{
+		Participants: []utils.SocketAddr{participant},
+		Data:         data,
+	}
+}
+
+// --- Setters ---
+
 func (g *Group) SetParticipants(participants []utils.SocketAddr) {
 	g.Participants = participants
 }
 
-func (g *Group) ToJson() []byte {
-	json, _ := json.Marshal(g)
-	return json
-}
+// --- Add and remove participants ---
 
 // AddParticipant to Group
 func (g *Group) AddParticipant(host utils.SocketAddr) error {
-	// fmt.Printf("%p", &g.Participants)
-	if len(g.Participants) >= 3 {
+	if len(g.Participants) >= ParticipantCount {
 		return errors.New("group is full")
 	}
 	g.SetParticipants(append(g.Participants, host))
-	// fmt.Println(host)
 	return nil
-
 }
 
+// RemoveParticipant from Group
 func (g *Group) RemoveParticipant(host utils.SocketAddr) error {
 	fmt.Println("Removing:", host, "from a group")
 	for i, participant := range g.Participants {
@@ -57,13 +63,13 @@ func (g *Group) RemoveParticipant(host utils.SocketAddr) error {
 	return nil
 }
 
-func NewGroup(data [4096]byte, participant utils.SocketAddr) *Group {
-	return &Group{
-		Participants: []utils.SocketAddr{participant},
-		Data:         data,
-	}
+// ToJson returns a JSON representation of the group
+func (g *Group) ToJson() []byte {
+	groupJson, _ := json.Marshal(g)
+	return groupJson
 }
 
+// String returns a string representation of the group
 func (g *Group) String() string {
 	return fmt.Sprintf("Data: %s\nGroup Members: %v\nUUID: %x\n\n", g.Data[:], g.Participants, sha256.Sum256(g.Data[:]))
 }

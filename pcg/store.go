@@ -16,7 +16,7 @@ const (
 )
 
 func PCGStore(overlay *Peer, data string) string {
-	uuid := overlay.NewGroup(data)
+	uuid := overlay.CreateGroup(data)
 	return uuid
 }
 
