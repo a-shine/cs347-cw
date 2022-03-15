@@ -57,10 +57,17 @@ func bfs(overlay *Peer, query string) []byte {
 		host := queue[0]
 		queue = queue[1:]
 		// Start a connection to the host, Ask host if he has data, receive resposnse
-		response, _ := utils.Request(host, []byte("pcgRetrieve/"), []byte(query))
+		response, err := utils.Request(host, []byte("pcgRetrieve/"), []byte(query))
+		if err != nil {
+			fmt.Println("error in request")
+			fmt.Println(err)
+			fmt.Println(response)
+		}
 		route, payload, err := utils.ParsePacket(response)
 		if err != nil {
 			fmt.Println("unable to parse packet")
+			fmt.Println(err)
+			fmt.Println(response)
 		}
 		// If the returned packet is success + the data then return it
 		// else add the known hosts of the remote node to the end of the queue

@@ -68,6 +68,7 @@ func (p *Peer) CreateGroup(data string) string {
 	hsha2 := sha256.Sum256(formattedData[:])
 	p.storage[hsha2] = NewGroup(formattedData, p.node.SocketAddr())
 	p.currentStorage += 4096 //TODO
+	fmt.Printf("stored: %s", data)
 	return fmt.Sprintf("%x", hsha2)
 }
 
