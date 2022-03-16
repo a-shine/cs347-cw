@@ -4,6 +4,7 @@
 package pcg
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/a-shine/butter/node"
@@ -15,10 +16,12 @@ import (
 // network.
 func retrieve(overlay node.Overlay, query []byte) []byte {
 	persistOverlay := overlay.(*Peer)
-	block, err := persistOverlay.Group(string(query))
+	group, err := persistOverlay.Group(string(query))
 	if err == nil {
-		return append([]byte("found/"), block.Data[:]...)
+		return append([]byte("found/"), group.Data[:]...)
 	}
+
+	//Otherwise not found, return byte array of known hosts to allow for further search...
 	hostsStruct := persistOverlay.Node().KnownHostsStruct()
 	knownHostsJson := hostsStruct.JsonDigest() // TODO: need to fix this
 	return append([]byte("try/"), knownHostsJson...)
@@ -30,29 +33,36 @@ func AppendRetrieveBehaviour(node *node.Node) {
 }
 
 // NaiveRetrieve entrypoint to search for a specific piece of information on the network by UUID (information hash)
-func NaiveRetrieve(overlay *Peer, query string) []byte {
+func NaiveRetrieve(overlay *Peer, query string) ([]byte, error) {
 	// Look if I have the information, else query known hosts for information
 	// One query per piece of information (one-to-one) hence the query has to be unique i.e i.d.
 
 	// do I have this information, if so return it
 	// else BFS (pass the query on to all known hosts (partial view)
+	fmt.Println(query)
 	block, err := overlay.Group(query)
 	if err == nil {
-		return block.Data[:]
+		return block.Data[:], nil
 	}
 	return bfs(overlay, query)
 }
 
+//PROBLEMS::
+// There are a series of (potential) problems with the following function:
+// 		* we're using len(queue) whilst also updating (this may or may not be a problem depending on how go works)
+// 		* Need to make sure no node already queried is checked again, this is by removing duplicates from the queue,
+///			 and also having a second list storing which have been checked so they're not added again either
+
 // bfs across the network until information is found. This is not particularly well suited to production and won't scale
 // well. However, for testing it provides a deterministic means of checking if information exists on the network.
-func bfs(overlay *Peer, query string) []byte {
+func bfs(overlay *Peer, query string) ([]byte, error) {
 	// Initialise an empty queue
 	queue := make([]utils.SocketAddr, 0)
 	// Add all my known hosts to the queue
 	for host := range overlay.Node().KnownHosts() {
 		queue = append(queue, host)
 	}
-	for len(queue) > 0 {
+	for len(queue) > 0 { //TODO CHECK THIS this with go
 		// Pop the first element from the queue
 		host := queue[0]
 		queue = queue[1:]
@@ -72,11 +82,11 @@ func bfs(overlay *Peer, query string) []byte {
 		// If the returned packet is success + the data then return it
 		// else add the known hosts of the remote node to the end of the queue
 		if string(route) == "found/" {
-			return payload
+			return payload, nil
 		}
 		// failed but gave us their known hosts to add to queue
 		remoteKnownHosts, _ := utils.AddrSliceFromJson(payload)
-		queue = append(queue, remoteKnownHosts...) // add the remote hosts to the end of the queue
+		queue = append(queue, remoteKnownHosts...) // add the remote hosts to the end of the queue. Why does this not loop forever??? GOing in circles innit, may be because len(queue) worked out before and not updated
 	}
-	return []byte("Information is not on the network")
+	return []byte(""), errors.New("Failed to retrieve information")
 }

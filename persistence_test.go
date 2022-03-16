@@ -12,11 +12,11 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 )
 
-const storerCount = 70
+const storerCount = 5
 
 const requesterCount = 1
 
-const lifetime = 25     // seconds
+const lifetime = 100    // seconds
 const chanceToDie = 200 // 0-1 change every second to die
 
 const requestRate = 1 //
@@ -37,7 +37,7 @@ var initi = true
 func TestNoFailure(t *testing.T) {
 	go maintainNodes()
 
-	time.Sleep(30 * time.Second)
+	time.Sleep(18 * time.Second)
 	active = false
 	for i := 0; i < requesterCount; i++ {
 		go makeRequester()
@@ -134,10 +134,14 @@ func dieAfterX(overlayInterface node.Overlay) {
  */
 func checkPersistence(overlayInterface node.Overlay) {
 	// for {
+	time.Sleep(5 * time.Second)
+
 	peer := overlayInterface.(*pcg.Peer)
+
 	for _, data := range storedData {
 
-		retrieved := pcg.NaiveRetrieve(peer, data)
+		retrieved, _ := pcg.NaiveRetrieve(peer, data)
+		fmt.Println("Retrieved: ", retrieved)
 
 		if len(retrieved[:]) == 0 {
 			failedRequests = failedRequests + 1
