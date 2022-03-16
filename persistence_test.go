@@ -12,12 +12,12 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 )
 
-const storerCount = 500
+const storerCount = 1000
 
-const requesterCount = 1
+const requesterCount = 10
 
-const lifetime = 100    // seconds
-const chanceToDie = 200 // 0-1 change every second to die
+const lifetime = 100  // seconds
+const chanceToDie = 2 // 0-1 change every second to die
 
 const requestRate = 1 //
 
@@ -37,15 +37,18 @@ var initi = true
 func TestNoFailure(t *testing.T) {
 	go maintainNodes()
 
-	time.Sleep(30 * time.Second)
-	active = false
+	//time.Sleep(20 * time.Second)
+
 	for i := 0; i < requesterCount; i++ {
+		time.Sleep(2 * time.Second)
 		go makeRequester()
 	}
-	// time.Sleep(100 * time.Second)
+	active = false
+	//time.Sleep(20 * time.Second)
 	time.Sleep(5 * time.Second)
-	fmt.Printf("\n\ntried: %d, failed: %d\n", requests, failedRequests)
-	fmt.Printf("\npercent success: %d", successRequests/requests*100)
+	// time.Sleep(100 * time.Second)
+	fmt.Printf("\n\ntried: %d, failed: %d, len of data %d\n", requests, failedRequests, len(storedData))
+	fmt.Printf("\npercent success: %d\n", successRequests/requests*100)
 }
 
 /*
@@ -78,6 +81,9 @@ func maintainNodes() {
 func makeStorer(createData bool) {
 
 	butterNode, _ := node.NewNode(0, 512)
+	if createData {
+		butterNode.RegisterClientBehaviour(addRandomData)
+	}
 	if lifetime != 0 {
 		butterNode.RegisterClientBehaviour(dieAfterX)
 	}
@@ -85,9 +91,7 @@ func makeStorer(createData bool) {
 	if chanceToDie != 0 {
 		butterNode.RegisterClientBehaviour(randomDeath)
 	}
-	if createData {
-		butterNode.RegisterClientBehaviour(addRandomData)
-	}
+
 	overlay := pcg.NewPCG(butterNode, 512) // Creates a new overlay network
 	pcg.AppendRetrieveBehaviour(overlay.Node())
 	pcg.AppendGroupStoreBehaviour(overlay.Node())
@@ -113,10 +117,11 @@ func makeRequester() {
 * Generates some data and stores it in the node
  */
 func addRandomData(overlayInterface node.Overlay) {
-	// time.Sleep(1 * time.Second)
+	time.Sleep(1 * time.Second)
 	peer := overlayInterface.(*pcg.Peer)
-	fmt.Println("Sock addr: ", peer.Node().SocketAddr())
-	storedData = append(storedData, pcg.Store(peer, gofakeit.Name()))
+	//fmt.Println("Sock addr: ", peer.Node().SocketAddr())
+	uuid := pcg.Store(peer, gofakeit.Name())
+	storedData = append(storedData, uuid)
 }
 
 /*
@@ -166,7 +171,8 @@ func randomDeath(overlayInterface node.Overlay) {
 			overlayInterface.Node().Shutdown()
 			return
 		}
-		time.Sleep(1 * time.Second)
+		//time.Sleep(1 * time.Second)
+		time.Sleep(200 * time.Millisecond)
 	}
 }
 

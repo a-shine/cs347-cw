@@ -1,0 +1,32 @@
+dial tcp 172.21.5.251:43501: connect: connection refused
+dial tcp 172.21.5.251:39107: connect: connection refused
+dial tcp 172.21.5.251:33871: connect: connection refused
+dial tcp 172.21.5.251:39171: connect: connection refused
+dial tcp 172.21.5.251:34903: connect: connection refused
+dial tcp 172.21.5.251:35375: connect: connection refused
+dial tcp 172.21.5.251:43147: connect: connection refused
+dial tcp 172.21.5.251:37785: connect: connection refused
+dial tcp 172.21.5.251:45239: connect: connection refused
+dial tcp 172.21.5.251:40183: connect: connection refused
+dial tcp 172.21.5.251:41735: connect: connection refused
+dial tcp 172.21.5.251:41875: connect: connection refused
+dial tcp 172.21.5.251:40449: connect: connection refused
+dial tcp 172.21.5.251:33705: connect: connection refused
+dial tcp 172.21.5.251:43945: connect: connection refused
+dial tcp 172.21.5.251:36823: connect: connection refused
+dial tcp 172.21.5.251:45945: connect: connection refused
+Leaving the butter network...
+Leaving the butter network...
+panic: close of closed channel
+
+goroutine 56691 [running]:
+github.com/a-shine/butter/node.(*Node).closeListener(0xc001122b00)
+	/home/eryljoy/.local/go/pkg/mod/github.com/a-shine/butter@v0.0.0-20220316100132-8f69546fb2d7/node/node.go:174 +0x29
+github.com/a-shine/butter/node.(*Node).Shutdown(...)
+	/home/eryljoy/.local/go/pkg/mod/github.com/a-shine/butter@v0.0.0-20220316100132-8f69546fb2d7/node/node.go:187
+github.com/a-shine/butter.setupLeaveHandler.func1()
+	/home/eryljoy/.local/go/pkg/mod/github.com/a-shine/butter@v0.0.0-20220316100132-8f69546fb2d7/p2p.go:42 +0x71
+created by github.com/a-shine/butter.setupLeaveHandler
+	/home/eryljoy/.local/go/pkg/mod/github.com/a-shine/butter@v0.0.0-20220316100132-8f69546fb2d7/p2p.go:39 +0xdd
+exit status 2
+FAIL	github.com/a-shine/cs347-cw	8.080s
