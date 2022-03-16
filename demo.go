@@ -28,7 +28,7 @@ func retrieve(overlay *pcg.Peer) {
 	fmt.Println("Information UUID:")
 	in := bufio.NewReader(os.Stdin)
 	uuid, _ := in.ReadString('\n') // Read string up to newline
-	data := pcg.NaiveRetrieve(overlay, strings.TrimSpace(uuid))
+	data, _ := pcg.NaiveRetrieve(overlay, strings.TrimSpace(uuid))
 	clear()
 	fmt.Println(string(data))
 	fmt.Println("Enter to continue...")
