@@ -14,7 +14,7 @@ import (
 
 const storerCount = 5
 
-const requesterCount = 10
+const requesterCount = 1
 
 const lifetime = 100  // seconds
 const chanceToDie = 2 // 0-1 change every second to die
@@ -37,18 +37,18 @@ var initi = true
 func TestNoFailure(t *testing.T) {
 	go maintainNodes()
 
-	time.Sleep(18 * time.Second)
+	time.Sleep(10 * time.Second)
 	active = false
 	for i := 0; i < requesterCount; i++ {
-		time.Sleep(2 * time.Second)
+
 		go makeRequester()
 	}
 	active = false
 	//time.Sleep(20 * time.Second)
-	time.Sleep(5 * time.Second)
+	time.Sleep(20 * time.Second)
 	// time.Sleep(100 * time.Second)
 	fmt.Printf("\n\ntried: %d, failed: %d, len of data %d\n", requests, failedRequests, len(storedData))
-	fmt.Printf("\npercent success: %d\n", successRequests/requests*100)
+	//fmt.Printf("\npercent success: %d\n", successRequests/requests*100)
 }
 
 /*
@@ -88,9 +88,9 @@ func makeStorer(createData bool) {
 		butterNode.RegisterClientBehaviour(dieAfterX)
 	}
 	// enable to test churn
-	if chanceToDie != 0 {
-		butterNode.RegisterClientBehaviour(randomDeath)
-	}
+	// if chanceToDie != 0 {
+	// 	butterNode.RegisterClientBehaviour(randomDeath)
+	// }
 
 	overlay := pcg.NewPCG(butterNode, 512) // Creates a new overlay network
 	pcg.AppendRetrieveBehaviour(overlay.Node())
@@ -139,7 +139,7 @@ func dieAfterX(overlayInterface node.Overlay) {
  */
 func checkPersistence(overlayInterface node.Overlay) {
 	// for {
-	time.Sleep(5 * time.Second)
+	time.Sleep(15 * time.Second)
 
 	peer := overlayInterface.(*pcg.Peer)
 

@@ -60,8 +60,14 @@ func bfs(overlay *Peer, query string) ([]byte, error) {
 	queue := make([]utils.SocketAddr, 0)
 	// Add all my known hosts to the queue
 	for host := range overlay.Node().KnownHosts() {
+		//print("\nhost", host)
 		queue = append(queue, host)
 	}
+	print("queue: ", len(queue))
+	// host map for checked check
+	// iterate through knew know hosts
+	// only add to queue if not already checked
+
 	for len(queue) > 0 { //TODO CHECK THIS this with go
 		// Pop the first element from the queue
 		host := queue[0]
@@ -86,7 +92,8 @@ func bfs(overlay *Peer, query string) ([]byte, error) {
 		}
 		// failed but gave us their known hosts to add to queue
 		remoteKnownHosts, _ := utils.AddrSliceFromJson(payload)
+		print(payload)
 		queue = append(queue, remoteKnownHosts...) // add the remote hosts to the end of the queue. Why does this not loop forever??? GOing in circles innit, may be because len(queue) worked out before and not updated
 	}
-	return []byte(""), errors.New("Failed to retrieve information")
+	return []byte(""), errors.New("failed to retrieve information")
 }
