@@ -61,13 +61,13 @@ func bfs(overlay *Peer, query string) []byte {
 		if err != nil {
 			fmt.Println("error in request")
 			fmt.Println(err)
-			fmt.Println(response)
+			//fmt.Println(response)
 		}
 		route, payload, err := utils.ParsePacket(response)
 		if err != nil {
 			fmt.Println("unable to parse packet")
 			fmt.Println(err)
-			fmt.Println(response)
+			//fmt.Println(response)
 		}
 		// If the returned packet is success + the data then return it
 		// else add the known hosts of the remote node to the end of the queue

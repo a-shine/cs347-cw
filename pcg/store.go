@@ -113,7 +113,7 @@ func manageParticipants(peer *Peer) {
 				if err != nil {
 					fmt.Println("Error removing participant:", err)
 				}
-				fmt.Println(group.Participants)
+				//fmt.Println(group.Participants)
 			}
 			// if in group our list of participants is correct
 		}
@@ -147,15 +147,13 @@ func findParticipants(pcg *Peer, group *Group) {
 				break
 			}
 			response, err := utils.Request(host, []byte(canJoinUri), output)
-			fmt.Println(string(response))
+			//fmt.Println(string(response))
 			if err != nil || string(response) == "no storage available" {
 				// too bad
 				fmt.Println(err)
-				fmt.Println("life is sad")
 			}
 
 			if string(response) == "accepted" {
-				fmt.Println("adding:", host)
 				// fmt.Printf("%p", &group.Participants)
 				err := group.AddParticipant(host)
 				if err != nil {

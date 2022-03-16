@@ -48,10 +48,10 @@ func (g *Group) AddParticipant(host utils.SocketAddr) error {
 
 // RemoveParticipant from Group
 func (g *Group) RemoveParticipant(host utils.SocketAddr) error {
-	fmt.Println("Removing:", host, "from a group")
+	//fmt.Println("Removing:", host, "from a group")
 	for i, participant := range g.Participants {
-		fmt.Println(participant.ToString())
-		fmt.Println(host.ToString())
+		//fmt.Println(participant.ToString())
+		//fmt.Println(host.ToString())
 		if participant.ToString() == host.ToString() {
 			g.Participants = append(g.Participants[:i], g.Participants[i+1:]...)
 			break

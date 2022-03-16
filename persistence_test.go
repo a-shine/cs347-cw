@@ -12,28 +12,26 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 )
 
-const storerCount = 5
-
-var activeStorers = 0
+const storerCount = 70
 
 const requesterCount = 1
 
-const avgLifetime = 40 // seconds
-const chanceToDie = 2  // 0-1 change every second to die
-// const pctGraceful = 50
-const responseDelay = 0 // seconds, 0 = expected behaviour not possible to implement with current package state
-const requestRate = 1   //? unclear
+const lifetime = 25     // seconds
+const chanceToDie = 200 // 0-1 change every second to die
 
-var attemptsNo = 0
-var numberOfRequestFailures = 0
+const requestRate = 1 //
 
 const dataGenInterval = 10 //seconds
+
 const dataSize = 100
 
+var activeStorers = 0
+var requests = 0
+var successRequests = 0
+var failedRequests = 0
 var storedData = make([]string, 0)
 var active = true
-
-//const listDataHashes []string = []
+var initi = true
 
 // Create n nodes and let n/2 nodes exit the network gracefully
 func TestNoFailure(t *testing.T) {
@@ -42,12 +40,17 @@ func TestNoFailure(t *testing.T) {
 	time.Sleep(30 * time.Second)
 	active = false
 	for i := 0; i < requesterCount; i++ {
-		go makeRequester(i)
+		go makeRequester()
 	}
 	// time.Sleep(100 * time.Second)
 	time.Sleep(5 * time.Second)
-	fmt.Printf("\n\n\n\n\ntried: %d, failed: %d\n", attemptsNo, numberOfRequestFailures)
+	fmt.Printf("\n\ntried: %d, failed: %d\n", requests, failedRequests)
+	fmt.Printf("\npercent success: %d", successRequests/requests*100)
 }
+
+/*
+* Ensures the correct number of nodes are always active
+ */
 
 func maintainNodes() {
 	for {
@@ -55,27 +58,36 @@ func maintainNodes() {
 			return
 		}
 		if activeStorers < storerCount {
-			for i := 0; i < storerCount-activeStorers; i++ {
+			var z = storerCount - activeStorers
+			for i := 0; i < z; i++ {
 
 				activeStorers = activeStorers + 1
-				go makeStorer()
+				go makeStorer(initi)
 			}
 		}
-
+		initi = false
 	}
 }
 
-func makeStorer() {
+/*
+* Creates a node dedicated to storing data
+* createData dictates whether this node should create it's own data or not
+*
+ */
+
+func makeStorer(createData bool) {
 
 	butterNode, _ := node.NewNode(0, 512)
-	if avgLifetime != 0 {
+	if lifetime != 0 {
 		butterNode.RegisterClientBehaviour(dieAfterX)
 	}
 	// enable to test churn
 	if chanceToDie != 0 {
 		butterNode.RegisterClientBehaviour(randomDeath)
 	}
-	butterNode.RegisterClientBehaviour(addRandomData)
+	if createData {
+		butterNode.RegisterClientBehaviour(addRandomData)
+	}
 	overlay := pcg.NewPCG(butterNode, 512) // Creates a new overlay network
 	pcg.AppendRetrieveBehaviour(overlay.Node())
 	pcg.AppendGroupStoreBehaviour(overlay.Node())
@@ -83,7 +95,10 @@ func makeStorer() {
 	butter.Spawn(&overlay, false) // blocking
 }
 
-func makeRequester(i int) {
+/*
+* Makes a node that will check for all added data
+ */
+func makeRequester() {
 	butterNode, _ := node.NewNode(0, 512)
 	butterNode.RegisterClientBehaviour(checkPersistence)
 	butterNode.RegisterClientBehaviour(dieAfterX)
@@ -94,51 +109,51 @@ func makeRequester(i int) {
 	butter.Spawn(&overlay, false) // blocking
 }
 
-//// Find a way of killing goroutines + creating new nodes on the fly and let n/2 exit gracefully + random ungraceful failures
-//func TestWithFailure(t *testing.T) {
-//}
-//
-//// All but 1 node dies all nodes fail ungracefully
-//func TotalFailure(t *testing.T) {
-//}
-
+/*
+* Generates some data and stores it in the node
+ */
 func addRandomData(overlayInterface node.Overlay) {
+	time.Sleep(1 * time.Second)
 	peer := overlayInterface.(*pcg.Peer)
 	fmt.Println("Sock addr: ", peer.Node().SocketAddr())
 	storedData = append(storedData, pcg.Store(peer, gofakeit.Name()))
 }
 
+/*
+* Kills the node after a set amount of time has passed
+ */
 func dieAfterX(overlayInterface node.Overlay) {
-	time.Sleep(time.Duration(avgLifetime) * time.Second)
-	fmt.Println("dying now")
+	time.Sleep(time.Duration(lifetime) * time.Second)
 	activeStorers = activeStorers - 1
 	overlayInterface.Node().Shutdown()
 
 }
 
+/*
+* Checks stored data has persisted
+ */
 func checkPersistence(overlayInterface node.Overlay) {
 	// for {
 	peer := overlayInterface.(*pcg.Peer)
 	for _, data := range storedData {
-		// var formattedData [4096]byte
-		// copy(formattedData[:], data)
-		// hsha2 := sha256.Sum256(formattedData[:])
 
 		retrieved := pcg.NaiveRetrieve(peer, data)
 
 		if len(retrieved[:]) == 0 {
-			numberOfRequestFailures = numberOfRequestFailures + 1
+			failedRequests = failedRequests + 1
 		} else {
-			fmt.Println("Found it yay")
-			fmt.Println(retrieved)
+			successRequests = successRequests + 1
 		}
-		attemptsNo = attemptsNo + 1
+		requests = requests + 1
 	}
 	time.Sleep(requestRate * time.Second)
-	// }
-
 }
+
+/*
+* has a chance to kill a node ever second
+ */
 func randomDeath(overlayInterface node.Overlay) {
+	time.Sleep(4 * time.Second)
 	for {
 		if !active {
 			return
@@ -147,12 +162,10 @@ func randomDeath(overlayInterface node.Overlay) {
 			rand.NewSource(time.Now().UnixNano()))
 		num := seededRand.Intn(chanceToDie)
 		if num == 0 {
-			fmt.Println("Dying")
 			activeStorers = activeStorers - 1
 			overlayInterface.Node().Shutdown()
 			return
 		}
-		fmt.Println("THought about death, decided no")
 		time.Sleep(1 * time.Second)
 	}
 }

@@ -2,7 +2,7 @@ module github.com/a-shine/cs347-cw
 
 go 1.17
 
-require github.com/a-shine/butter v0.0.0-20220224083200-e814d76b08be
+require github.com/a-shine/butter v0.0.0-20220316100132-8f69546fb2d7
 
 require (
 	github.com/brianvoe/gofakeit/v6 v6.15.0

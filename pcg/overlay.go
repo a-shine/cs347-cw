@@ -23,7 +23,7 @@ type Peer struct {
 func NewPCG(node *node.Node, maxMemoryMb uint64) Peer {
 	maxMemory := MbToBytes(maxMemoryMb)
 	maxStorage := MaxStorage(maxMemory)
-	fmt.Println("Max storage:", maxStorage)
+	//fmt.Println("Max storage:", maxStorage)
 	return Peer{
 		node:       node,
 		maxStorage: maxStorage,
@@ -68,7 +68,6 @@ func (p *Peer) CreateGroup(data string) string {
 	hsha2 := sha256.Sum256(formattedData[:])
 	p.storage[hsha2] = NewGroup(formattedData, p.node.SocketAddr())
 	p.currentStorage += 4096 //TODO
-	fmt.Printf("stored: %s", data)
 	return fmt.Sprintf("%x", hsha2)
 }
 
