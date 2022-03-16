@@ -12,11 +12,11 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 )
 
-const storerCount = 70
+const storerCount = 500
 
 const requesterCount = 1
 
-const lifetime = 25     // seconds
+const lifetime = 100    // seconds
 const chanceToDie = 200 // 0-1 change every second to die
 
 const requestRate = 1 //
@@ -113,7 +113,7 @@ func makeRequester() {
 * Generates some data and stores it in the node
  */
 func addRandomData(overlayInterface node.Overlay) {
-	time.Sleep(1 * time.Second)
+	// time.Sleep(1 * time.Second)
 	peer := overlayInterface.(*pcg.Peer)
 	fmt.Println("Sock addr: ", peer.Node().SocketAddr())
 	storedData = append(storedData, pcg.Store(peer, gofakeit.Name()))
