@@ -11,15 +11,16 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 )
 
-const storerCount = 10
+const storerCount = 20
 
-const requesterCount = 1
+//const requesterCount = 1
 
-const lifetime = 200   // seconds
-const chanceToDie = 20 // 1 in x chance to die every second
-const gracePeriod = 5  //The time nodes have aafter spawning before they can die
-const churnTime = 30   //The number of seconds the network should churn for
-const settleTime = 10  //The amount of time you wish to give the network to settle after churn, can be 0
+const lifetime = 0 // seconds
+//any of below can be 0
+const chanceToDie = 1000 // 1 in x chance to die every second
+const gracePeriod = 5    //The time nodes have aafter spawning before they can die
+const churnTime = 30     //The number of seconds the network should churn for
+const settleTime = 10    //The amount of time you wish to give the network to settle after churn, can be 0
 
 // const requestRate = 1 //
 
@@ -53,7 +54,10 @@ func TestNoFailure(t *testing.T) {
 	}
 	// time.Sleep(100 * time.Second)
 	fmt.Printf("\n\ntried: %d, failed: %d, len of data %d\n", requests, failedRequests, len(storedData))
-	//fmt.Printf("\npercent success: %d\n", successRequests/requests*100)
+	fmt.Printf("\npercent success: %d\n", (successRequests/requests)*100)
+}
+func TestSomethingElse(t *testing.T) {
+
 }
 
 /*
@@ -147,17 +151,20 @@ func checkPersistence(overlayInterface node.Overlay) {
 	fmt.Println("Retreiver address: ", peer.Node().SocketAddr())
 
 	for {
-		if len(peer.Node().KnownHosts()) > 0 {
+		if len(peer.Node().KnownHosts()) > 0 { // wait for the requester to connect to a node in the netwrork
+			fmt.Println(peer.Node().KnownHosts())
+			fmt.Println("Connecting to Network...")
+
 			break
 		}
 	}
 
 	for _, data := range storedData {
 
-		retrieved, _ := pcg.NaiveRetrieve(peer, data)
+		_, err := pcg.NaiveRetrieve(peer, data)
 		//fmt.Println("Retrieved: ", retrieved)
 
-		if len(retrieved[:]) == 0 {
+		if err != nil {
 			failedRequests = failedRequests + 1
 		} else {
 			successRequests = successRequests + 1

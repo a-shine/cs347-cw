@@ -79,7 +79,7 @@ func heartbeat(overlayInterface node.Overlay) {
 	pcgn := overlayInterface.(*Peer)
 	for {
 		manageParticipants(pcgn)
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 2)
 	}
 }
 
