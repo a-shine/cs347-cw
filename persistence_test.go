@@ -20,7 +20,7 @@ const lifetime = 0 // seconds
 const chanceToDie = 1000 // 1 in x chance to die every second
 const gracePeriod = 5    //The time nodes have aafter spawning before they can die
 const churnTime = 30     //The number of seconds the network should churn for
-const settleTime = 10    //The amount of time you wish to give the network to settle after churn, can be 0
+const settleTime = 35    //The amount of time you wish to give the network to settle after churn, can be 0
 
 // const requestRate = 1 //
 
@@ -54,7 +54,7 @@ func TestNoFailure(t *testing.T) {
 	}
 	// time.Sleep(100 * time.Second)
 	fmt.Printf("\n\ntried: %d, failed: %d, len of data %d\n", requests, failedRequests, len(storedData))
-	fmt.Printf("\npercent success: %d\n", (successRequests/requests)*100)
+	fmt.Printf("\npercent success: %f\n", (float64(successRequests)/float64(requests))*100)
 }
 func TestSomethingElse(t *testing.T) {
 
