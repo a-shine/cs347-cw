@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"testing"
 	"time"
 
@@ -12,18 +11,21 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 )
 
-const storerCount = 5
+const storerCount = 10
 
 const requesterCount = 1
 
-const lifetime = 100  // seconds
-const chanceToDie = 2 // 0-1 change every second to die
+const lifetime = 200   // seconds
+const chanceToDie = 20 // 1 in x chance to die every second
+const gracePeriod = 5  //The time nodes have aafter spawning before they can die
+const churnTime = 30   //The number of seconds the network should churn for
+const settleTime = 10  //The amount of time you wish to give the network to settle after churn, can be 0
 
-const requestRate = 1 //
+// const requestRate = 1 //
 
-const dataGenInterval = 10 //seconds
+// const dataGenInterval = 10 //seconds
 
-const dataSize = 100
+// const dataSize = 100
 
 var activeStorers = 0
 var requests = 0
@@ -32,17 +34,23 @@ var failedRequests = 0
 var storedData = make([]string, 0)
 var active = true
 var initi = true
+var finished = false
+var churn = true
 
 // Create n nodes and let n/2 nodes exit the network gracefully
 func TestNoFailure(t *testing.T) {
-	go maintainNodes()
-	time.Sleep(10 * time.Second)
-	go makeRequester()
-	time.Sleep(20 * time.Second)
-
-	active = false
-	//time.Sleep(20 * time.Second)
-	time.Sleep(5 * time.Second)
+	go maintainNodes()                   // create the network
+	time.Sleep(churnTime * time.Second)  // leave the network to churn
+	churn = false                        //stop the network churning
+	time.Sleep(settleTime * time.Second) // let the network settle
+	go makeRequester()                   // create the requester to check for data persistence
+	fmt.Println("waiting for requests to fininsh, active storers: ", activeStorers)
+	for { //wait for the requests to have been made
+		if finished {
+			break
+		}
+		time.Sleep(1 * time.Second)
+	}
 	// time.Sleep(100 * time.Second)
 	fmt.Printf("\n\ntried: %d, failed: %d, len of data %d\n", requests, failedRequests, len(storedData))
 	//fmt.Printf("\npercent success: %d\n", successRequests/requests*100)
@@ -84,10 +92,10 @@ func makeStorer(createData bool) {
 	if lifetime != 0 {
 		butterNode.RegisterClientBehaviour(dieAfterX)
 	}
-	// enable to test churn
-	// if chanceToDie != 0 {
-	// 	butterNode.RegisterClientBehaviour(randomDeath)
-	// }
+	//enable to test churn
+	if chanceToDie != 0 {
+		butterNode.RegisterClientBehaviour(randomDeath)
+	}
 
 	overlay := pcg.NewPCG(butterNode, 512) // Creates a new overlay network
 	pcg.AppendRetrieveBehaviour(overlay.Node())
@@ -135,10 +143,14 @@ func dieAfterX(overlayInterface node.Overlay) {
 * Checks stored data has persisted
  */
 func checkPersistence(overlayInterface node.Overlay) {
-	// for {
 	peer := overlayInterface.(*pcg.Peer)
 	fmt.Println("Retreiver address: ", peer.Node().SocketAddr())
-	time.Sleep(20 * time.Second)
+
+	for {
+		if len(peer.Node().KnownHosts()) > 0 {
+			break
+		}
+	}
 
 	for _, data := range storedData {
 
@@ -152,47 +164,45 @@ func checkPersistence(overlayInterface node.Overlay) {
 		}
 		requests = requests + 1
 	}
-	time.Sleep(requestRate * time.Second)
+	finished = true
 }
 
 /*
 * has a chance to kill a node ever second
  */
 func randomDeath(overlayInterface node.Overlay) {
-	time.Sleep(4 * time.Second)
+	time.Sleep(gracePeriod * time.Second)
 	for {
-		if !active {
+		if !churn {
 			return
 		}
-		var seededRand *rand.Rand = rand.New(
-			rand.NewSource(time.Now().UnixNano()))
-		num := seededRand.Intn(chanceToDie)
+		num := gofakeit.Number(0, chanceToDie)
 		if num == 0 {
 			activeStorers = activeStorers - 1
 			overlayInterface.Node().Shutdown()
 			return
 		}
-		//time.Sleep(1 * time.Second)
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(1 * time.Second)
 	}
 }
 
-const charset = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+// DEPRICATED
+// const charset = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-var seededRand *rand.Rand = rand.New(
-	rand.NewSource(time.Now().UnixNano()))
+// var seededRand *rand.Rand = rand.New(
+// 	rand.NewSource(time.Now().UnixNano()))
 
-func StringWithCharset(length int, charset string) string {
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
-	}
-	return string(b)
-}
+// func StringWithCharset(length int, charset string) string {
+// 	b := make([]byte, length)
+// 	for i := range b {
+// 		b[i] = charset[seededRand.Intn(len(charset))]
+// 	}
+// 	return string(b)
+// }
 
-func String(length int) string {
-	return StringWithCharset(length, charset)
-}
+// func String(length int) string {
+// 	return StringWithCharset(length, charset)
+// }
 
 /*
 Testing

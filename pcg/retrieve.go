@@ -19,24 +19,18 @@ func retrieve(overlay node.Overlay, query []byte) []byte {
 	persistOverlay := overlay.(*Peer)
 	group, err := persistOverlay.Group(string(query))
 	if err == nil {
-		fmt.Println("I have it!")
+		//fmt.Println("I have it!")
 		return append([]byte("found/"), group.Data[:]...)
 	}
 
 	////Otherwise not found, return byte array of known hosts to allow for further search...
-	//hostsStruct := persistOverlay.Node().KnownHostsStruct()
-	//knownHostsJson := hostsStruct.JsonDigest() // TODO: need to fix this
-	//fmt.Println("I don't have it!")
-	//fmt.Println("My known hosts: ", persistOverlay.Node().KnownHosts())
-	//fmt.Println("My known host structs: ", persistOverlay.Node().KnownHostsStruct())
-	//fmt.Println("Mt known hosts json: ", knownHostsJson)
 	addrs := make([]utils.SocketAddr, 0)
 	// Add all my known hosts to the queue
 	for host := range overlay.Node().KnownHosts() {
 		addrs = append(addrs, host)
 	}
 	addrsJson, _ := json.Marshal(addrs)
-	fmt.Println("My known hosts: ", addrs)
+	//fmt.Println("My known hosts: ", addrs)
 	return append([]byte("try/"), addrsJson...)
 }
 
@@ -83,8 +77,8 @@ func bfs(overlay *Peer, query string) ([]byte, error) {
 	// only add to queue if not already checked
 
 	for { //TODO CHECK THIS this with go
-		print("len: ", len(queue), ":\n")
-		fmt.Println("queue: ", queue, ":\n")
+		// print("len: ", len(queue), ":\n")
+		// fmt.Println("queue: ", queue, ":\n")
 		if len(queue) <= 0 {
 			break
 		}
@@ -97,13 +91,13 @@ func bfs(overlay *Peer, query string) ([]byte, error) {
 		if err != nil {
 			fmt.Println("error in request")
 			fmt.Println(err)
-			//fmt.Println(response)
+			continue
 		}
 		route, payload, err := utils.ParsePacket(response)
 		if err != nil {
 			fmt.Println("unable to parse packet")
 			fmt.Println(err)
-			//fmt.Println(response)
+			continue
 		}
 		// If the returned packet is success + the data then return it
 		// else add the known hosts of the remote node to the end of the queue
