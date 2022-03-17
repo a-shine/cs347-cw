@@ -4,6 +4,7 @@
 package pcg
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -22,14 +23,21 @@ func retrieve(overlay node.Overlay, query []byte) []byte {
 		return append([]byte("found/"), group.Data[:]...)
 	}
 
-	//Otherwise not found, return byte array of known hosts to allow for further search...
-	hostsStruct := persistOverlay.Node().KnownHostsStruct()
-	knownHostsJson := hostsStruct.JsonDigest() // TODO: need to fix this
-	fmt.Println("I don't have it!")
-	fmt.Println("My known hosts: ", persistOverlay.Node().KnownHosts())
-	fmt.Println("My known host structs: ", persistOverlay.Node().KnownHostsStruct())
-	fmt.Println("Mt known hosts json: ", knownHostsJson)
-	return append([]byte("try/"), knownHostsJson...)
+	////Otherwise not found, return byte array of known hosts to allow for further search...
+	//hostsStruct := persistOverlay.Node().KnownHostsStruct()
+	//knownHostsJson := hostsStruct.JsonDigest() // TODO: need to fix this
+	//fmt.Println("I don't have it!")
+	//fmt.Println("My known hosts: ", persistOverlay.Node().KnownHosts())
+	//fmt.Println("My known host structs: ", persistOverlay.Node().KnownHostsStruct())
+	//fmt.Println("Mt known hosts json: ", knownHostsJson)
+	addrs := make([]utils.SocketAddr, 0)
+	// Add all my known hosts to the queue
+	for host := range overlay.Node().KnownHosts() {
+		addrs = append(addrs, host)
+	}
+	addrsJson, _ := json.Marshal(addrs)
+	fmt.Println("My known hosts: ", addrs)
+	return append([]byte("try/"), addrsJson...)
 }
 
 // AppendRetrieveBehaviour to the Butter node (much like registering an http route in a tradition backend web framework)
