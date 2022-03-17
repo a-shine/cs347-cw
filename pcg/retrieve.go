@@ -18,12 +18,17 @@ func retrieve(overlay node.Overlay, query []byte) []byte {
 	persistOverlay := overlay.(*Peer)
 	group, err := persistOverlay.Group(string(query))
 	if err == nil {
+		fmt.Println("I have it!")
 		return append([]byte("found/"), group.Data[:]...)
 	}
 
 	//Otherwise not found, return byte array of known hosts to allow for further search...
 	hostsStruct := persistOverlay.Node().KnownHostsStruct()
 	knownHostsJson := hostsStruct.JsonDigest() // TODO: need to fix this
+	fmt.Println("I don't have it!")
+	fmt.Println("My known hosts: ", persistOverlay.Node().KnownHosts())
+	fmt.Println("My known host structs: ", persistOverlay.Node().KnownHostsStruct())
+	fmt.Println("Mt known hosts json: ", knownHostsJson)
 	return append([]byte("try/"), knownHostsJson...)
 }
 
@@ -58,19 +63,26 @@ func NaiveRetrieve(overlay *Peer, query string) ([]byte, error) {
 func bfs(overlay *Peer, query string) ([]byte, error) {
 	// Initialise an empty queue
 	queue := make([]utils.SocketAddr, 0)
+	checked := make(map[utils.SocketAddr]bool)
 	// Add all my known hosts to the queue
 	for host := range overlay.Node().KnownHosts() {
 		//print("\nhost", host)
 		queue = append(queue, host)
 	}
-	print("queue: ", len(queue))
+
 	// host map for checked check
 	// iterate through knew know hosts
 	// only add to queue if not already checked
 
-	for len(queue) > 0 { //TODO CHECK THIS this with go
+	for { //TODO CHECK THIS this with go
+		print("len: ", len(queue), ":\n")
+		fmt.Println("queue: ", queue, ":\n")
+		if len(queue) <= 0 {
+			break
+		}
 		// Pop the first element from the queue
 		host := queue[0]
+		checked[host] = true
 		queue = queue[1:]
 		// Start a connection to the host, Ask host if he has data, receive resposnse
 		response, err := utils.Request(host, []byte("pcgRetrieve/"), []byte(query))
@@ -88,12 +100,20 @@ func bfs(overlay *Peer, query string) ([]byte, error) {
 		// If the returned packet is success + the data then return it
 		// else add the known hosts of the remote node to the end of the queue
 		if string(route) == "found/" {
+			fmt.Println("found")
 			return payload, nil
 		}
 		// failed but gave us their known hosts to add to queue
 		remoteKnownHosts, _ := utils.AddrSliceFromJson(payload)
-		print(payload)
-		queue = append(queue, remoteKnownHosts...) // add the remote hosts to the end of the queue. Why does this not loop forever??? GOing in circles innit, may be because len(queue) worked out before and not updated
+		fmt.Println("got payload: ", payload)
+		for _, x := range remoteKnownHosts {
+			if !checked[x] {
+				queue = append(queue, x)
+			}
+		}
+		//queue = append(queue, remoteKnownHosts...) // add the remote hosts to the end of the queue. Why does this not loop forever??? GOing in circles innit, may be because len(queue) worked out before and not updated
+
 	}
+	fmt.Println("failed")
 	return []byte(""), errors.New("failed to retrieve information")
 }

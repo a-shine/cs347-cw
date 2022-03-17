@@ -36,16 +36,13 @@ var initi = true
 // Create n nodes and let n/2 nodes exit the network gracefully
 func TestNoFailure(t *testing.T) {
 	go maintainNodes()
-
 	time.Sleep(10 * time.Second)
-	active = false
-	for i := 0; i < requesterCount; i++ {
+	go makeRequester()
+	time.Sleep(20 * time.Second)
 
-		go makeRequester()
-	}
 	active = false
 	//time.Sleep(20 * time.Second)
-	time.Sleep(20 * time.Second)
+	time.Sleep(5 * time.Second)
 	// time.Sleep(100 * time.Second)
 	fmt.Printf("\n\ntried: %d, failed: %d, len of data %d\n", requests, failedRequests, len(storedData))
 	//fmt.Printf("\npercent success: %d\n", successRequests/requests*100)
@@ -119,7 +116,7 @@ func makeRequester() {
 func addRandomData(overlayInterface node.Overlay) {
 	time.Sleep(1 * time.Second)
 	peer := overlayInterface.(*pcg.Peer)
-	//fmt.Println("Sock addr: ", peer.Node().SocketAddr())
+
 	uuid := pcg.Store(peer, gofakeit.Name())
 	storedData = append(storedData, uuid)
 }
@@ -139,14 +136,14 @@ func dieAfterX(overlayInterface node.Overlay) {
  */
 func checkPersistence(overlayInterface node.Overlay) {
 	// for {
-	time.Sleep(15 * time.Second)
-
 	peer := overlayInterface.(*pcg.Peer)
+	fmt.Println("Retreiver address: ", peer.Node().SocketAddr())
+	time.Sleep(20 * time.Second)
 
 	for _, data := range storedData {
 
 		retrieved, _ := pcg.NaiveRetrieve(peer, data)
-		fmt.Println("Retrieved: ", retrieved)
+		//fmt.Println("Retrieved: ", retrieved)
 
 		if len(retrieved[:]) == 0 {
 			failedRequests = failedRequests + 1
