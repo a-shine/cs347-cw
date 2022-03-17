@@ -151,7 +151,7 @@ func checkPersistence(overlayInterface node.Overlay) {
 	fmt.Println("Retreiver address: ", peer.Node().SocketAddr())
 
 	for {
-		if len(peer.Node().KnownHosts()) > 1 { // wait for the requester to connect to a node in the netwrork
+		if len(peer.Node().KnownHosts()) > 0 { // wait for the requester to connect to a node in the netwrork
 			fmt.Println(peer.Node().KnownHosts())
 			fmt.Println("Connecting to Network...")
 			break
