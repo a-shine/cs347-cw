@@ -176,7 +176,7 @@ func findParticipants(pcg *Peer, group *Group) {
 		// do this until a participant is found - so if doen't work first time try
 		// again - if group particpants becomes 3 then break
 
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 1)
 		if len(group.Participants) == 3 {
 			break
 		}

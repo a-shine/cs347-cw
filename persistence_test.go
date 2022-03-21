@@ -11,16 +11,16 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 )
 
-const storerCount = 20
+const storerCount = 100
 
 //const requesterCount = 1
 
-const lifetime = 0 // seconds
+const lifetime = 0 // seconds - how long nodes live for
 //any of below can be 0
-const chanceToDie = 1000 // 1 in x chance to die every second
-const gracePeriod = 5    //The time nodes have aafter spawning before they can die
-const churnTime = 30     //The number of seconds the network should churn for
-const settleTime = 35    //The amount of time you wish to give the network to settle after churn, can be 0
+const chanceToDie = 100 // 1 in x chance to die every second
+const gracePeriod = 10  //The time nodes have aafter spawning before they can die - how long before they can begin to have a chance to die
+const churnTime = 60    //The number of seconds the network should churn for
+const settleTime = 90   //The amount of time you wish to give the network to settle after churn, can be 0
 
 // const requestRate = 1 //
 
@@ -192,24 +192,6 @@ func randomDeath(overlayInterface node.Overlay) {
 		time.Sleep(1 * time.Second)
 	}
 }
-
-// DEPRICATED
-// const charset = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
-// var seededRand *rand.Rand = rand.New(
-// 	rand.NewSource(time.Now().UnixNano()))
-
-// func StringWithCharset(length int, charset string) string {
-// 	b := make([]byte, length)
-// 	for i := range b {
-// 		b[i] = charset[seededRand.Intn(len(charset))]
-// 	}
-// 	return string(b)
-// }
-
-// func String(length int) string {
-// 	return StringWithCharset(length, charset)
-// }
 
 /*
 Testing
