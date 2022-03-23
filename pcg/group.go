@@ -12,11 +12,13 @@ import (
 
 const GroupStructSize = unsafe.Sizeof(Group{})
 
-// ParticipantCount is an alias for the DataReplicationCount, that a group optimises for. 
 const DataReplicationCount = 3
-const ParticipantCount = DataReplicationCount 
 
-// A Group is a group of nodes and the data that they are responsible for maintaining.
+// ParticipantCount is an alias for the DataReplicationCount i.e. you can think of data replication and group
+// participants interchangeably
+const ParticipantCount = DataReplicationCount
+
+// A Group is a set of participants and the data that they are responsible for maintaining.
 type Group struct {
 	Participants []utils.SocketAddr
 	Data         [4096]byte

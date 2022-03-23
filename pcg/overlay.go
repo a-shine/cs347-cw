@@ -12,7 +12,7 @@ import (
 // Peer implements an overlay node, as described in the Butter node overlay interface.
 type Peer struct {
 	node           *node.Node
-	maxStorage     uint64 
+	maxStorage     uint64
 	currentStorage uint64
 	storage        map[[32]byte]*Group
 }
@@ -28,20 +28,18 @@ func NewPCG(node *node.Node, maxMemoryMb uint64) Peer {
 	}
 }
 
-// Node gets the underyling Node in the Peer object.
-// Required to implement the Butter overlay interface.
-func (p *Peer) Node() *node.Node { 
+// Node gets the underlying Node in the Peer object. Required by the Butter overlay interface.
+func (p *Peer) Node() *node.Node {
 	return p.node
 }
 
-// AvailableStorage gets the remaining storage available to a Peer.
-// Required to implement the Butter overlay interface.
-func (p *Peer) AvailableStorage() uint64 { 
+// AvailableStorage gets the remaining storage available to a Peer. Required by the Butter overlay interface.
+func (p *Peer) AvailableStorage() uint64 {
 	return p.maxStorage - p.currentStorage
 }
 
-// Group gets a Peer's Group by its UUID. 
-// If the Peer is not a participant of the passed UUID's Group, returns nil with an error.
+// Group gets a Peer's Group by its UUID. If the Peer is not a participant of the passed UUID's Group, returns nil with
+// an error.
 func (p *Peer) Group(id string) (*Group, error) {
 	var hash [32]byte
 	data, _ := hex.DecodeString(id)
@@ -57,9 +55,8 @@ func (p *Peer) Groups() map[[32]byte]*Group {
 	return p.storage
 }
 
-// CreateGroup creates a Group storing the passed data, and assigns the Peer as its first participant.
-// The Group UUID is generated from the stored information.
-// Returns the UUID of the new group as a string.
+// CreateGroup creates a Group storing the passed data, and assigns the Peer as its first participant. The Group UUID is
+// generated from the stored information. Returns the UUID of the new group as a string.
 func (p *Peer) CreateGroup(data string) string {
 	var formattedData [4096]byte
 	copy(formattedData[:], data)
