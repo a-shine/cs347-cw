@@ -15,23 +15,23 @@ const (
 	canJoinUri = "can-join?/"
 )
 
-var alreadyFinding bool
+var alreadyFinding bool // flag to check if the leader is already finding new participants for the group
 
-// Store adds the passed data to the network using PCG.
-// Creates Group for passed Peer storing passed data.
+// Store adds the passed data to the network using the PCG protocol. Returns the UUID for the data on the network.
 func Store(overlay *Peer, data string) string {
+	// Creates Group for passed Peer storing passed data
 	uuid := overlay.CreateGroup(data)
 	return uuid
 }
 
-// AppendGroupStoreBehaviour registers the behaviours that allow the node to work with the PCG overlay.
+// AppendGroupStoreBehaviour registers the behaviours that allow the node to work with the PCG overlay
 func AppendGroupStoreBehaviour(node *node.Node) {
 	node.RegisterServerBehaviour(inGroupUri, inGroup)
 	node.RegisterServerBehaviour(canJoinUri, canJoin)
 	node.RegisterClientBehaviour(heartbeat)
 }
 
-// inGroup is a server behaviour - a querying node can ask a given node if it is in a group.
+// inGroup is a server behaviour - a querying node can ask a given node if it is in a group
 func inGroup(overlayInterface node.Overlay, groupId []byte) []byte {
 	pcg := overlayInterface.(*Peer)
 	_, err := pcg.Group(string(groupId))
@@ -41,14 +41,14 @@ func inGroup(overlayInterface node.Overlay, groupId []byte) []byte {
 	return []byte("Group member")
 }
 
-// canJoin is a server behaviour - a querying node can ask a given node if it has the memory capacity to join a group.
+// canJoin is a server behaviour - a querying node can ask a given node if it has the memory capacity to join a group
 func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
 	peer := overlayInterface.(*Peer)
 	if peer.currentStorage < peer.maxStorage {
-		var groupDigest Group 
+		var groupDigest Group
 		err := json.Unmarshal(payload, &groupDigest)
 		if err != nil {
-			fmt.Println("error marchallng group")
+			fmt.Println("error marshaling group")
 		}
 		peer.JoinGroup(groupDigest)
 		return []byte("accepted")
@@ -56,7 +56,8 @@ func canJoin(overlayInterface node.Overlay, payload []byte) []byte {
 	return []byte("can't join group")
 }
 
-// heartbeat schedules a Node to manage its Groups' participants. 
+// heartbeat is a client behaviour (always running in the background of the node) that schedules a Node to manage its
+// Groups' participants
 func heartbeat(overlayInterface node.Overlay) {
 	pcgn := overlayInterface.(*Peer)
 	for {
@@ -65,7 +66,7 @@ func heartbeat(overlayInterface node.Overlay) {
 	}
 }
 
-// amILeader returns whether a given Peer is the leader of a given Group.
+// amILeader returns whether a given Peer is the leader of a given Group
 func (p *Peer) amILeader(g *Group) bool {
 	socketAddr := p.Node().SocketAddr()
 	socketAddrStr := socketAddr.ToString()
@@ -80,9 +81,9 @@ func (p *Peer) amILeader(g *Group) bool {
 	return true
 }
 
-// manageParticipants triggers a given Peer to manage its Groups' participants.
-// For every Group of Peer and Participant of Group, check if Participant is still in Group, and update Participants list accordingly.
-// If the Group has fewer than 3 Participants, find new replacement Participants.
+// manageParticipants triggers a given Peer to manage its Groups' participants. For every Group of Peer and Participant
+// of Group, check if Participant is still in Group, and update Participants list accordingly. If the Group has fewer
+// than 3 Participants, find new replacement Participants.
 func manageParticipants(peer *Peer) {
 	for id, group := range peer.Groups() {
 		for _, participant := range group.Participants {
@@ -100,7 +101,7 @@ func manageParticipants(peer *Peer) {
 	}
 }
 
-// GroupContains returns whether the passed Node is contained in the passed array of Nodes.
+// GroupContains checks if a host is withing a group's participants
 func GroupContains(g []utils.SocketAddr, h utils.SocketAddr) bool {
 	for _, a := range g {
 		if a.ToString() == h.ToString() {
@@ -110,11 +111,12 @@ func GroupContains(g []utils.SocketAddr, h utils.SocketAddr) bool {
 	return false
 }
 
-// findParticipants finds Peers from a given Peer's known hosts to assign to a Group.
-// Checks that they don't already belong to the Group.
-// Checks that they have enough storage for the Group's data.
-// Breaks out of while loop once Group has the correct number of Participants.
+// findParticipants finds Peers from a given Peer's known hosts to assign to a Group. This is done by the leader of the
+// group.
 func findParticipants(pcg *Peer, group *Group) {
+	// Checks that they don't already belong to the Group.
+	// Checks that they have enough storage for the Group's data.
+	// Breaks out of while loop once Group has the correct number of Participants.
 	alreadyFinding = true
 	for {
 		for host, _ := range pcg.Node().KnownHosts() {
@@ -137,7 +139,7 @@ func findParticipants(pcg *Peer, group *Group) {
 				if len(group.Participants) == 3 {
 					break
 				}
-			}			
+			}
 		}
 		time.Sleep(time.Second * 1)
 		if len(group.Participants) == 3 {

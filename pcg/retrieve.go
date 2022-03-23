@@ -13,6 +13,9 @@ import (
 	"github.com/a-shine/butter/utils"
 )
 
+const foundEndpoint = "found/"
+const tryEndpoint = "try/"
+
 // retrieve behaviour for a PCG node. When queried, it will either return the information if it is part of the group
 // responsible for hosting it, else it will return its known hosts so that the querying node can continue querying the
 // network.
@@ -22,7 +25,7 @@ func retrieve(overlay node.Overlay, query []byte) []byte {
 	// Check if node has data (i.e. is part of group)
 	group, err := persistOverlay.Group(string(query))
 	if err == nil {
-		return append([]byte("found/"), group.Data[:]...) // queryHit
+		return append([]byte(foundEndpoint), group.Data[:]...) // queryHit
 	}
 
 	// Otherwise, if data is not found, return byte array of known hosts to allow for further search
@@ -34,7 +37,7 @@ func retrieve(overlay node.Overlay, query []byte) []byte {
 	}
 	addrsJson, _ := json.Marshal(addrs)
 
-	return append([]byte("try/"), addrsJson...)
+	return append([]byte(tryEndpoint), addrsJson...)
 }
 
 // AppendRetrieveBehaviour to the Butter node (much like registering an HTTP route in a tradition backend web framework)
@@ -98,9 +101,9 @@ func bfs(overlay *Peer, query string) ([]byte, error) {
 
 		// If the returned packet is success then we have found the information
 		// else add the known hosts of the remote node to the end of the queue
-		if string(route) == "found/" {
+		if string(route) == foundEndpoint {
 			return payload, nil
-		} else if string(route) == "try/" {
+		} else if string(route) == tryEndpoint {
 			// Failed but gave us their known hosts to add to queue
 			remoteKnownHosts, _ := utils.AddrSliceFromJson(payload)
 
