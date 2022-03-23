@@ -11,17 +11,18 @@ import (
 )
 
 const GroupStructSize = unsafe.Sizeof(Group{})
-const DataReplicationCount = 3
-const ParticipantCount = DataReplicationCount // Number of participants that a group optimises for (alias for data replication count)
 
-// A Group is a collection of nodes and the data that they are responsible for maintaining
+// ParticipantCount is an alias for the DataReplicationCount, that a group optimises for. 
+const DataReplicationCount = 3
+const ParticipantCount = DataReplicationCount 
+
+// A Group is a group of nodes and the data that they are responsible for maintaining.
 type Group struct {
 	Participants []utils.SocketAddr
 	Data         [4096]byte
 }
 
-// -- Constructor ---
-
+// NewGroup constructs a Group.
 func NewGroup(data [4096]byte, participant utils.SocketAddr) *Group {
 	return &Group{
 		Participants: []utils.SocketAddr{participant},
@@ -29,15 +30,12 @@ func NewGroup(data [4096]byte, participant utils.SocketAddr) *Group {
 	}
 }
 
-// --- Setters ---
-
+// SetParticipants assigns nodes to be Group participants.
 func (g *Group) SetParticipants(participants []utils.SocketAddr) {
 	g.Participants = participants
 }
 
-// --- Add and remove participants ---
-
-// AddParticipant to Group
+// AddParticipant assigns a node to be a Group participant.
 func (g *Group) AddParticipant(host utils.SocketAddr) error {
 	if len(g.Participants) >= ParticipantCount {
 		return errors.New("group is full")
@@ -46,12 +44,9 @@ func (g *Group) AddParticipant(host utils.SocketAddr) error {
 	return nil
 }
 
-// RemoveParticipant from Group
+// RemoveParticipant removes a participant node from a Group
 func (g *Group) RemoveParticipant(host utils.SocketAddr) error {
-	//fmt.Println("Removing:", host, "from a group")
 	for i, participant := range g.Participants {
-		//fmt.Println(participant.ToString())
-		//fmt.Println(host.ToString())
 		if participant.ToString() == host.ToString() {
 			g.Participants = append(g.Participants[:i], g.Participants[i+1:]...)
 			break
@@ -63,15 +58,13 @@ func (g *Group) RemoveParticipant(host utils.SocketAddr) error {
 	return nil
 }
 
-// --- Encoders ---
-
-// ToJson returns a JSON representation of the group
+// ToJson returns a JSON representation of the group.
 func (g *Group) ToJson() []byte {
 	groupJson, _ := json.Marshal(g)
 	return groupJson
 }
 
-// String returns a string representation of the group
+// String returns a string representation of the group.
 func (g *Group) String() string {
 	return fmt.Sprintf("Data: %s\nGroup Members: %v\nUUID: %x\n\n", g.Data[:], g.Participants, sha256.Sum256(g.Data[:]))
 }
