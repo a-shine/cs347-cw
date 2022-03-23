@@ -57,7 +57,6 @@ func (p *Peer) Groups() map[[32]byte]*Group {
 	return p.storage
 }
 
-
 // CreateGroup creates a Group storing the passed data, and assigns the Peer as its first participant.
 // The Group UUID is generated from the stored information.
 // Returns the UUID of the new group as a string.
@@ -79,7 +78,6 @@ func (p *Peer) JoinGroup(g Group) {
 	}
 	p.storage[hsha2] = &g
 }
-
 
 // String returns a string representation of a Peer.
 func (p *Peer) String() string {
