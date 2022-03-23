@@ -19,7 +19,6 @@ func retrieve(overlay node.Overlay, query []byte) []byte {
 	persistOverlay := overlay.(*Peer)
 	group, err := persistOverlay.Group(string(query))
 	if err == nil {
-		//fmt.Println("I have it!")
 		return append([]byte("found/"), group.Data[:]...)
 	}
 
@@ -30,7 +29,6 @@ func retrieve(overlay node.Overlay, query []byte) []byte {
 		addrs = append(addrs, host)
 	}
 	addrsJson, _ := json.Marshal(addrs)
-	//fmt.Println("My known hosts: ", addrs)
 	return append([]byte("try/"), addrsJson...)
 }
 
@@ -46,7 +44,6 @@ func NaiveRetrieve(overlay *Peer, query string) ([]byte, error) {
 
 	// do I have this information, if so return it
 	// else BFS (pass the query on to all known hosts (partial view)
-	//fmt.Println(query)
 	block, err := overlay.Group(query)
 	if err == nil {
 		return block.Data[:], nil
@@ -76,9 +73,7 @@ func bfs(overlay *Peer, query string) ([]byte, error) {
 	// iterate through knew know hosts
 	// only add to queue if not already checked
 
-	for { //TODO CHECK THIS this with go
-		// print("len: ", len(queue), ":\n")
-		// fmt.Println("queue: ", queue, ":\n")
+	for {
 		if len(queue) <= 0 {
 			break
 		}
@@ -102,20 +97,16 @@ func bfs(overlay *Peer, query string) ([]byte, error) {
 		// If the returned packet is success + the data then return it
 		// else add the known hosts of the remote node to the end of the queue
 		if string(route) == "found/" {
-			// fmt.Println("found")
 			return payload, nil
 		}
 		// failed but gave us their known hosts to add to queue
 		remoteKnownHosts, _ := utils.AddrSliceFromJson(payload)
-		//fmt.Println("got payload: ", payload)
 		for _, x := range remoteKnownHosts {
 			if !checked[x] {
 				queue = append(queue, x)
 			}
 		}
 		//queue = append(queue, remoteKnownHosts...) // add the remote hosts to the end of the queue. Why does this not loop forever??? GOing in circles innit, may be because len(queue) worked out before and not updated
-
 	}
-	//fmt.Println("failed")
 	return []byte(""), errors.New("failed to retrieve information")
 }
