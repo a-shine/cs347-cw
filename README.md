@@ -1,4 +1,4 @@
-# CS347 coursework
+# PCG Overlay
 
 ## Background
 
