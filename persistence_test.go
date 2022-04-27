@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/a-shine/butter"
-	"github.com/a-shine/butter/node"
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/butter-network/butter"
+	"github.com/butter-network/butter/node"
 	"github.com/butter-network/pcg-overlay/pcg"
 )
 

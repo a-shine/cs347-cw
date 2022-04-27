@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/a-shine/butter/node"
-	"github.com/a-shine/butter/utils"
+	"github.com/butter-network/butter/node"
+	"github.com/butter-network/butter/utils"
 )
 
 const foundEndpoint = "found/"

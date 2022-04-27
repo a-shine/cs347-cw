@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/a-shine/butter/utils"
+	"github.com/butter-network/butter/utils"
 )
 
 const GroupStructSize = unsafe.Sizeof(Group{})

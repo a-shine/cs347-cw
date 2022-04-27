@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/a-shine/butter/node"
+	"github.com/butter-network/butter/node"
 )
 
 // Peer implements an overlay node, as described in the Butter node overlay interface.
