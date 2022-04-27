@@ -1,11 +1,11 @@
-module github.com/a-shine/cs347-cw
+module github.com/butter-network/pcg-overlay
 
 go 1.17
 
 require github.com/a-shine/butter v0.0.0-20220316100132-8f69546fb2d7
 
 require (
-	github.com/brianvoe/gofakeit/v6 v6.15.0
+	github.com/brianvoe/gofakeit/v6 v6.16.0 // indirect
 	github.com/jordwest/mock-conn v0.0.0-20180617021051-4896c6bd1641 // indirect
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58 // indirect
 	gitlab.com/NebulousLabs/fastrand v0.0.0-20181126182046-603482d69e40 // indirect

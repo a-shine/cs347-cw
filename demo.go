@@ -15,7 +15,7 @@ import (
 
 	"github.com/a-shine/butter"
 	"github.com/a-shine/butter/node"
-	"github.com/a-shine/cs347-cw/pcg"
+	"github.com/butter-network/pcg-overlay/pcg"
 )
 
 // clear the terminal so that the interface is clean and easier to read

@@ -7,8 +7,8 @@ import (
 
 	"github.com/a-shine/butter"
 	"github.com/a-shine/butter/node"
-	"github.com/a-shine/cs347-cw/pcg"
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/butter-network/pcg-overlay/pcg"
 )
 
 // --- Parameters for the test ---

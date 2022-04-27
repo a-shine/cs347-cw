@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/cs347-cw.iml" filepath="$PROJECT_DIR$/.idea/cs347-cw.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/pcg-overlay.iml" filepath="$PROJECT_DIR$/.idea/pcg-overlay.iml" />
     </modules>
   </component>
 </project>
