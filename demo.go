@@ -107,5 +107,5 @@ func main() {
 	pcg.AppendGroupStoreBehaviour(overlay.Node())
 
 	// Spawn the node into the network with the appended demo client behaviour and pcg overlay protocols
-	butter.Spawn(&overlay, false)
+	butter.Spawn(&overlay, false, false)
 }
