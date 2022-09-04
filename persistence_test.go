@@ -121,7 +121,7 @@ func makeStorer(createData bool) {
 	pcg.AppendRetrieveBehaviour(overlay.Node())
 	pcg.AppendGroupStoreBehaviour(overlay.Node())
 
-	butter.Spawn(&overlay, false) // blocking
+	butter.Spawn(&overlay, false, false) // blocking
 }
 
 // makeRequester creates a node dedicated to requesting data from the network
@@ -133,7 +133,7 @@ func makeRequester() {
 	pcg.AppendRetrieveBehaviour(overlay.Node())
 	pcg.AppendGroupStoreBehaviour(overlay.Node())
 
-	butter.Spawn(&overlay, false) // blocking
+	butter.Spawn(&overlay, false, false) // blocking
 }
 
 // addRandomData generates some data and stores through a node
